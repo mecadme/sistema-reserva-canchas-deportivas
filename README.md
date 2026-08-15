@@ -42,6 +42,14 @@ Los microfrontends se integrarán mediante Module Federation. Los servicios expo
 
 La propuesta inicial para cuatro integrantes se encuentra en [docs/TEAM.md](docs/TEAM.md). Cada frente tiene dos responsables, pero los contratos OpenAPI y los flujos de extremo a extremo se revisan entre frontend y backend.
 
+## Hoja de ruta
+
+Las fases previstas, desde los acuerdos técnicos iniciales hasta la entrega final, están en [docs/ROADMAP.md](docs/ROADMAP.md).
+
+## Cómo levantar el proyecto
+
+Aún no hay una composición local lista: la configuración de Docker Compose para levantar PostgreSQL, los microservicios y el `shell` con sus microfrontends está pendiente. El detalle de lo que incluirá está en [infra/README.md](infra/README.md).
+
 ## Flujo de trabajo
 
 1. Crear una rama desde `develop`: `feat/<componente>-<descripcion>`.
