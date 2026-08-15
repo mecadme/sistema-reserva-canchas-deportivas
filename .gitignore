@@ -1,0 +1,65 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+
+# Node and frontend
+node_modules/
+.pnpm-store/
+dist/
+build/
+coverage/
+.cache/
+.turbo/
+.nx/
+*.tsbuildinfo
+
+# Java and Spring Boot
+target/
+*.class
+*.jar
+*.war
+*.ear
+.gradle/
+build/
+out/
+bin/
+logs/
+
+# Maven and Gradle wrappers remain versioned
+!.mvn/wrapper/maven-wrapper.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# Operating systems
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+tmp/
+temp/
+
+# Test and tooling output
+.pytest_cache/
+.scannerwork/
+.sonar/
+test-results/
+playwright-report/
+
+# Docker overrides
+docker-compose.override.yml
+compose.override.yml
