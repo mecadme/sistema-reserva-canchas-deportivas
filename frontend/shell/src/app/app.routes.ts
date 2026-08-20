@@ -26,7 +26,7 @@ export const routes: Routes = [
       {
         path: 'clientes',
         canActivate: [roleGuard(['cliente'])],
-        loadComponent: () => import('mfClientes/Component').then((m) => m.App),
+        loadChildren: () => import('mfClientes/Routes').then((m) => m.routes),
       },
       {
         path: 'admin',

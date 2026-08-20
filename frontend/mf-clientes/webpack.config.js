@@ -5,7 +5,7 @@ module.exports = withModuleFederationPlugin({
   name: 'mfClientes',
 
   exposes: {
-    './Component': './src/app/app.ts',
+    './Routes': './src/app/app.routes.ts',
   },
 
   shared: {

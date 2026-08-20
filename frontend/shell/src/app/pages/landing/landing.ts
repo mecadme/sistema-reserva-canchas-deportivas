@@ -22,8 +22,8 @@ export class Landing {
   ];
 
   protected readonly steps = [
-    { title: 'Elegí tu cancha', description: 'Consultá disponibilidad por deporte, fecha y horario.' },
-    { title: 'Reservá en segundos', description: 'Confirmá el bloque horario que más te convenga.' },
+    { title: 'Elige tu cancha', description: 'Consulta disponibilidad por deporte, fecha y horario.' },
+    { title: 'Reserva en segundos', description: 'Confirma el bloque horario que más te convenga.' },
     { title: 'Juega', description: 'Gestioná y cancelá tus reservas cuando quieras.' },
   ];
 }

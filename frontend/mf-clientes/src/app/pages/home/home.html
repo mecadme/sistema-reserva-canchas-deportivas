@@ -1,0 +1,81 @@
+<div class="reservation">
+  <header class="reservation__header">
+    <div>
+      <h1>Nueva reserva</h1>
+      <p>Elige el día, la cancha y el horario para tu próximo partido.</p>
+    </div>
+    <a routerLink="/clientes/reservas" class="my-reservations-link">Mis reservas ({{ confirmedReservationsCount() }})</a>
+  </header>
+
+  <section class="reservation__section">
+    <h2>1. Elige el día de tu reserva</h2>
+    <div class="option-grid" role="radiogroup" aria-label="Día de la reserva">
+      @for (date of dates; track date.iso) {
+        <button
+          type="button"
+          class="option-square"
+          role="radio"
+          [attr.aria-checked]="selectedDate() === date.iso"
+          [class.option-square--selected]="selectedDate() === date.iso"
+          (click)="selectDate(date.iso)"
+        >
+          <span class="option-square__top">{{ date.weekday }}</span>
+          <span class="option-square__main">{{ date.dayNumber }}</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="reservation__section">
+    <h2>2. Selecciona una cancha</h2>
+    <div class="option-grid" role="radiogroup" aria-label="Cancha">
+      @for (cancha of canchas; track cancha.id) {
+        <button
+          type="button"
+          class="option-square"
+          role="radio"
+          [attr.aria-checked]="selectedCanchaId() === cancha.id"
+          [class.option-square--selected]="selectedCanchaId() === cancha.id"
+          (click)="selectCancha(cancha.id)"
+        >
+          <span class="option-square__top">{{ cancha.emoji }}</span>
+          <span class="option-square__main option-square__main--text">{{ cancha.nombre }}</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="reservation__section">
+    <h2>3. Selecciona un horario</h2>
+
+    @if (loadingSlots()) {
+      <p class="reservation__status">Consultando disponibilidad...</p>
+    } @else {
+      <div class="option-grid" role="radiogroup" aria-label="Horario">
+        @for (slot of slots(); track slot.hora) {
+          <button
+            type="button"
+            class="option-square option-square--slot"
+            role="radio"
+            [disabled]="!slot.disponible"
+            [attr.aria-checked]="selectedSlot() === slot.hora"
+            [class.option-square--selected]="selectedSlot() === slot.hora"
+            [class.option-square--disabled]="!slot.disponible"
+            (click)="selectSlot(slot.hora)"
+          >
+            <span class="option-square__main">{{ slot.hora }}</span>
+          </button>
+        }
+      </div>
+    }
+  </section>
+
+  <button
+    type="button"
+    class="reserve-btn"
+    [disabled]="!selectedSlot() || reserving()"
+    (click)="reservar()"
+  >
+    {{ reserving() ? 'Reservando...' : '¡Reserva YA!' }}
+  </button>
+</div>

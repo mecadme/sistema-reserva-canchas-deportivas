@@ -1,4 +1,4 @@
-declare module 'mfClientes/Component' {
-  const Component: import('@angular/core').Type<unknown>;
-  export { Component as App };
+declare module 'mfClientes/Routes' {
+  const routes: import('@angular/router').Routes;
+  export { routes };
 }
