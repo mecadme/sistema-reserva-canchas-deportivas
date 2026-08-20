@@ -1,6 +1,6 @@
-# shell
+# mf-clientes
 
-Host de Module Federation. Será responsable del layout, navegación, sesión, autorización y carga de los microfrontends remotos.
+Remote para consultar disponibilidad, crear reservas, mostrar el historial del usuario y cancelar reservas propias válidas.
 
 ## Stack
 
@@ -16,4 +16,4 @@ pnpm install
 pnpm start
 ```
 
-Sirve en http://localhost:4300. Espera que `mf-clientes` esté corriendo en http://localhost:4201.
+Sirve en http://localhost:4201. Expone `./Component` (componente raíz) para ser consumido por `shell`.

@@ -1,0 +1,16 @@
+<div class="shell-layout">
+  <header class="shell-header">
+    <span class="brand">🏟️ CanchasYA</span>
+    @if (user(); as session) {
+      <div class="shell-header__user">
+        <span class="user-name">{{ session.user.nombre }}</span>
+        <span class="user-role">{{ session.user.role === 'admin' ? 'Administrador' : 'Cliente' }}</span>
+        <button type="button" class="btn btn-ghost" (click)="logout()">Salir</button>
+      </div>
+    }
+  </header>
+
+  <main class="shell-content">
+    <router-outlet />
+  </main>
+</div>
