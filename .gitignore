@@ -63,3 +63,7 @@ playwright-report/
 # Docker overrides
 docker-compose.override.yml
 compose.override.yml
+
+.agents/
+.claude/
+skills-lock.json

@@ -16,7 +16,7 @@ El documento fuente está versionado en [docs/requirements/Alcance_Funcional_Res
 | Área | Componente | Responsabilidad |
 | --- | --- | --- |
 | Frontend | `shell` | Layout, navegación, autenticación y orquestación de remotes |
-| Frontend | `mf-reservas` | Disponibilidad, creación, historial y cancelación de reservas |
+| Frontend | `mf-clientes` | Disponibilidad, creación, historial y cancelación de reservas |
 | Frontend | `mf-administracion` | Gestión de canchas, horarios, bloqueos, usuarios y reservas |
 | Frontend | `mf-reportes` | Indicadores básicos de ocupación y uso |
 | Backend | `ms-usuarios` | Registro, autenticación, usuarios y roles |
