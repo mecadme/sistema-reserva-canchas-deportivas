@@ -22,7 +22,7 @@ El frontend se organizará como un `shell` host y tres remotes integrados en tie
 | --- | --- | --- |
 | `shell` | 4300 | http://localhost:4300 |
 | `mf-clientes` | 4201 | http://localhost:4201 (remoteEntry.js) |
-| `mf-administracion` | 4202 | pendiente de scaffold |
+| `mf-administracion` | 4202 | http://localhost:4202 (remoteEntry.js) — scaffold base, sin pantallas funcionales |
 | `mf-reportes` | 4203 | pendiente de scaffold |
 
 ## Acuerdos pendientes

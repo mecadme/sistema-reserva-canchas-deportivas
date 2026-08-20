@@ -5,6 +5,7 @@ module.exports = {
 
     remotes: {
       "mfClientes": "http://localhost:4201/remoteEntry.js",
+      "mfAdministracion": "http://localhost:4202/remoteEntry.js",
     },
 
     shared: {

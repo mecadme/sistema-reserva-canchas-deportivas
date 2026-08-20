@@ -31,8 +31,7 @@ export const routes: Routes = [
       {
         path: 'admin',
         canActivate: [roleGuard(['admin'])],
-        loadComponent: () =>
-          import('./pages/admin-placeholder/admin-placeholder').then((m) => m.AdminPlaceholder),
+        loadChildren: () => import('mfAdministracion/Routes').then((m) => m.routes),
       },
     ],
   },
