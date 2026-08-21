@@ -8,13 +8,10 @@ export interface Reservation {
   fecha: string;
   hora: string;
   estado: ReservationStatus;
-  creadaEn: string;
 }
 
 export interface NewReservationInput {
   canchaId: string;
-  canchaNombre: string;
-  canchaEmoji: string;
   fecha: string;
   hora: string;
 }

@@ -1,15 +1,21 @@
 const { shareAll, withModuleFederationPlugin } = require('@angular-architects/module-federation/webpack');
 
-module.exports = withModuleFederationPlugin({
+module.exports = {
+  ...withModuleFederationPlugin({
 
-  name: 'mfAdministracion',
+    name: 'mfAdministracion',
 
-  exposes: {
-    './Routes': './src/app/app.routes.ts',
+    exposes: {
+      './Routes': './src/app/app.routes.ts',
+    },
+
+    shared: {
+      ...shareAll({ singleton: true, strictVersion: true, requiredVersion: 'auto' }),
+    },
+
+  }),
+
+  output: {
+    publicPath: 'http://localhost:4202/',
   },
-
-  shared: {
-    ...shareAll({ singleton: true, strictVersion: true, requiredVersion: 'auto' }),
-  },
-
-});
+};

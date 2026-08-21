@@ -7,6 +7,10 @@
     <a routerLink="/clientes" class="new-reservation-link">+ Nueva reserva</a>
   </header>
 
+  @if (cancelError()) {
+    <p class="reservas-status reservas-status--error">{{ cancelError() }}</p>
+  }
+
   @if (loading()) {
     <p class="reservas-status">Cargando tus reservas...</p>
   } @else if (reservations().length === 0) {

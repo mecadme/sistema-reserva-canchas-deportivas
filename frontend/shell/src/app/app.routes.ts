@@ -33,6 +33,11 @@ export const routes: Routes = [
         canActivate: [roleGuard(['admin'])],
         loadChildren: () => import('mfAdministracion/Routes').then((m) => m.routes),
       },
+      {
+        path: 'reportes',
+        canActivate: [roleGuard(['admin'])],
+        loadChildren: () => import('mfReportes/Routes').then((m) => m.routes),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

@@ -1,0 +1,113 @@
+services:
+  usuarios-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: usuarios_db
+      POSTGRES_USER: ${POSTGRES_USER:-reservas}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-reservas_local}
+    volumes: [usuarios_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-reservas} -d usuarios_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  canchas-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: canchas_db
+      POSTGRES_USER: ${POSTGRES_USER:-reservas}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-reservas_local}
+    volumes: [canchas_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-reservas} -d canchas_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  reservas-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: reservas_db
+      POSTGRES_USER: ${POSTGRES_USER:-reservas}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-reservas_local}
+    volumes: [reservas_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-reservas} -d reservas_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  reportes-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: reportes_db
+      POSTGRES_USER: ${POSTGRES_USER:-reservas}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-reservas_local}
+    volumes: [reportes_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-reservas} -d reportes_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  ms-usuarios:
+    build: ./ms-usuarios
+    environment:
+      DB_URL: jdbc:postgresql://usuarios-db:5432/usuarios_db
+      DB_USERNAME: ${POSTGRES_USER:-reservas}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-reservas_local}
+      JWT_SECRET: ${JWT_SECRET:-change-this-development-secret-with-at-least-32-characters}
+      SERVICE_API_KEY: ${SERVICE_API_KEY:-change-this-internal-service-key}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-Admin123*}
+    ports: ["8081:8081"]
+    depends_on:
+      usuarios-db: {condition: service_healthy}
+
+  ms-canchas:
+    build: ./ms-canchas
+    environment:
+      DB_URL: jdbc:postgresql://canchas-db:5432/canchas_db
+      DB_USERNAME: ${POSTGRES_USER:-reservas}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-reservas_local}
+      JWT_SECRET: ${JWT_SECRET:-change-this-development-secret-with-at-least-32-characters}
+      SERVICE_API_KEY: ${SERVICE_API_KEY:-change-this-internal-service-key}
+    ports: ["8082:8082"]
+    depends_on:
+      canchas-db: {condition: service_healthy}
+
+  ms-reservas:
+    build: ./ms-reservas
+    environment:
+      DB_URL: jdbc:postgresql://reservas-db:5432/reservas_db
+      DB_USERNAME: ${POSTGRES_USER:-reservas}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-reservas_local}
+      JWT_SECRET: ${JWT_SECRET:-change-this-development-secret-with-at-least-32-characters}
+      SERVICE_API_KEY: ${SERVICE_API_KEY:-change-this-internal-service-key}
+      CANCHAS_URL: http://ms-canchas:8082
+    ports: ["8083:8083"]
+    depends_on:
+      reservas-db: {condition: service_healthy}
+      ms-canchas: {condition: service_started}
+
+  ms-reportes:
+    build: ./ms-reportes
+    environment:
+      DB_URL: jdbc:postgresql://reportes-db:5432/reportes_db
+      DB_USERNAME: ${POSTGRES_USER:-reservas}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-reservas_local}
+      JWT_SECRET: ${JWT_SECRET:-change-this-development-secret-with-at-least-32-characters}
+      SERVICE_API_KEY: ${SERVICE_API_KEY:-change-this-internal-service-key}
+      RESERVAS_URL: http://ms-reservas:8083
+      CANCHAS_URL: http://ms-canchas:8082
+    ports: ["8084:8084"]
+    depends_on:
+      reportes-db: {condition: service_healthy}
+      ms-reservas: {condition: service_started}
+      ms-canchas: {condition: service_started}
+
+volumes:
+  usuarios_data:
+  canchas_data:
+  reservas_data:
+  reportes_data:

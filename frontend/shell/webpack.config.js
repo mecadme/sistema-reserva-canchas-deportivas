@@ -6,6 +6,7 @@ module.exports = {
     remotes: {
       "mfClientes": "http://localhost:4201/remoteEntry.js",
       "mfAdministracion": "http://localhost:4202/remoteEntry.js",
+      "mfReportes": "http://localhost:4203/remoteEntry.js",
     },
 
     shared: {
@@ -13,6 +14,10 @@ module.exports = {
     },
 
   }),
+
+  output: {
+    publicPath: 'http://localhost:4300/',
+  },
 
   devServer: {
     historyApiFallback: true,

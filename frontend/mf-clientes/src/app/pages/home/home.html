@@ -28,21 +28,25 @@
 
   <section class="reservation__section">
     <h2>2. Selecciona una cancha</h2>
-    <div class="option-grid" role="radiogroup" aria-label="Cancha">
-      @for (cancha of canchas; track cancha.id) {
-        <button
-          type="button"
-          class="option-square"
-          role="radio"
-          [attr.aria-checked]="selectedCanchaId() === cancha.id"
-          [class.option-square--selected]="selectedCanchaId() === cancha.id"
-          (click)="selectCancha(cancha.id)"
-        >
-          <span class="option-square__top">{{ cancha.emoji }}</span>
-          <span class="option-square__main option-square__main--text">{{ cancha.nombre }}</span>
-        </button>
-      }
-    </div>
+    @if (loadingCanchas()) {
+      <p class="reservation__status">Cargando canchas...</p>
+    } @else {
+      <div class="option-grid" role="radiogroup" aria-label="Cancha">
+        @for (cancha of canchas(); track cancha.id) {
+          <button
+            type="button"
+            class="option-square"
+            role="radio"
+            [attr.aria-checked]="selectedCanchaId() === cancha.id"
+            [class.option-square--selected]="selectedCanchaId() === cancha.id"
+            (click)="selectCancha(cancha.id)"
+          >
+            <span class="option-square__top">{{ cancha.emoji }}</span>
+            <span class="option-square__main option-square__main--text">{{ cancha.nombre }}</span>
+          </button>
+        }
+      </div>
+    }
   </section>
 
   <section class="reservation__section">
@@ -69,6 +73,10 @@
       </div>
     }
   </section>
+
+  @if (reserveError()) {
+    <p class="reservation__error">{{ reserveError() }}</p>
+  }
 
   <button
     type="button"

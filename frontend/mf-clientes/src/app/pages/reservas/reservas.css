@@ -48,6 +48,14 @@
   font-size: 0.9rem;
 }
 
+.reservas-status--error {
+  color: var(--color-danger);
+  font-weight: 600;
+  background: #fdecea;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+}
+
 .reservas-empty {
   text-align: center;
   padding: 3rem 1.5rem;
