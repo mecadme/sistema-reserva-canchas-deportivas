@@ -28,6 +28,9 @@ build/
 out/
 bin/
 logs/
+# ...except the hexagonal-architecture "domain/port/out" source package
+!**/domain/port/out/
+!**/domain/port/out/**
 
 # Maven and Gradle wrappers remain versioned
 !.mvn/wrapper/maven-wrapper.jar
