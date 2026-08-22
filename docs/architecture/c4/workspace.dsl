@@ -121,7 +121,7 @@ workspace "Sistema de Reserva de Canchas Deportivas" "Modelo C4 (Contexto, Conte
         sistemaReservas.shell.appRoutes -> sistemaReservas.shell.authenticatedLayout "Enruta a las rutas autenticadas (padre)"
         sistemaReservas.shell.appRoutes -> sistemaReservas.mfClientes "loadChildren('mfClientes/Routes') en /clientes" "Module Federation"
         sistemaReservas.shell.appRoutes -> sistemaReservas.mfAdministracion "loadChildren('mfAdministracion/Routes') en /admin" "Module Federation"
-        sistemaReservas.shell.appRoutes -> sistemaReservas.mfReportes "loadChildren('mfReportes/Routes') en /reportes" "Module Federation"
+        sistemaReservas.shell.appRoutes -> sistemaReservas.mfReportes "loadChildren('mfReportes/Routes') en /reportes, protegida por roleGuard(['admin'])" "Module Federation"
 
         sistemaReservas.shell.guestGuard -> sistemaReservas.shell.authService "Lee el usuario actual"
         sistemaReservas.shell.roleGuard -> sistemaReservas.shell.authService "Lee el usuario actual y su rol"
@@ -180,11 +180,11 @@ workspace "Sistema de Reserva de Canchas Deportivas" "Modelo C4 (Contexto, Conte
         sistemaReservas.mfAdministracion.mfaAuthInterceptor -> sistemaReservas.msCanchas "Agrega Authorization: Bearer <token>" "JSON/HTTPS"
         sistemaReservas.mfAdministracion.mfaAuthInterceptor -> sistemaReservas.msUsuarios "Agrega Authorization: Bearer <token>" "JSON/HTTPS"
         sistemaReservas.mfAdministracion.mfaAuthInterceptor -> sistemaReservas.msReservas "Agrega Authorization: Bearer <token>" "JSON/HTTPS"
-        sistemaReservas.mfReportes -> sistemaReservas.msReportes "Consulta reportes de ocupación y uso" "JSON/HTTPS"
+        sistemaReservas.mfReportes -> sistemaReservas.msReportes "Consulta reportes de ocupación y uso (solo rol ADMINISTRADOR)" "JSON/HTTPS"
 
         sistemaReservas.mfReportes.mfrRoutes -> sistemaReservas.mfReportes.reportes "Enruta a '' (raíz del remote)"
         sistemaReservas.mfReportes.reportes -> sistemaReservas.mfReportes.reportesService "Genera el reporte para el rango de fechas seleccionado"
-        sistemaReservas.mfReportes.reportesService -> sistemaReservas.msReportes.reporteController "GET /api/v1/reportes/ocupacion" "JSON/HTTPS"
+        sistemaReservas.mfReportes.reportesService -> sistemaReservas.msReportes.reporteController "GET /api/v1/reportes/ocupacion, hasRole(ADMINISTRADOR) en SecurityConfig" "JSON/HTTPS"
         sistemaReservas.mfReportes.mfrAuthInterceptor -> sistemaReservas.msReportes "Agrega Authorization: Bearer <token>" "JSON/HTTPS"
 
         sistemaReservas.msReportes.reporteController -> sistemaReservas.msReportes.reporteService "generar()"
