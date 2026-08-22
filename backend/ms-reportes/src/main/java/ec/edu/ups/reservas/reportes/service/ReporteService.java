@@ -14,6 +14,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Módulo de reportes de solo lectura (secc. 3.3.5), único consumidor del rol ADMINISTRADOR.
+ * No tiene tablas propias de canchas ni de reservas: agrega, en el momento de la consulta,
+ * datos que pide vía HTTP a {@code ms-reservas} y {@code ms-canchas} ({@link DatosServicePort}),
+ * respetando la independencia de datos entre microservicios (secc. 4.3). Lo único que persiste
+ * localmente es un log de auditoría de qué reporte se generó y cuándo ({@link ReporteConsulta}).
+ */
 @Service
 public class ReporteService implements ReporteUseCase {
 
@@ -62,6 +69,15 @@ public class ReporteService implements ReporteUseCase {
                 .toList();
     }
 
+    /**
+     * "Porcentaje de ocupación por cancha (horas reservadas sobre horas disponibles)" (secc. 3.3.5).
+     * {@code bloquesDisponibles} es una capacidad teórica: (minutos de horario de atención /
+     * duración del slot) * días del rango; no descuenta mantenimientos, así que una cancha con
+     * bloqueos frecuentes puede mostrar una ocupación algo más baja que la real. Una cancha
+     * inactiva se reporta con 0 bloques disponibles (evita división por cero) y por lo tanto
+     * 0% de ocupación en vez de "sin datos". El {@code Math.round(... * 10_000.0) / 100.0}
+     * redondea a 2 decimales sin arrastrar errores de punto flotante de una división directa.
+     */
     private OcupacionCancha calcularOcupacion(CanchaInfo cancha, ResumenReservas resumen, long dias) {
         long minutosHorario = Duration.between(cancha.horaApertura(), cancha.horaCierre()).toMinutes();
         long bloquesDisponibles = cancha.activa() ? (minutosHorario / slotMinutes) * dias : 0;

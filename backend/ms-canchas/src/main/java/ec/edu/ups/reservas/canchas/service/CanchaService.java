@@ -69,6 +69,14 @@ public class CanchaService implements CanchaUseCase {
         return CanchaResponse.from(canchas.save(cancha));
     }
 
+    /**
+     * Registra un bloqueo de mantenimiento (secc. 3.3.4/RN-07): un rango horario en el que
+     * la cancha no puede reservarse aunque esté activa (p.ej. mantenimiento imprevisto).
+     * {@code ms-reservas} consulta estos bloqueos a través de {@code /internal/**}
+     * ({@code CanchaInternaResponse.bloqueada}/{@code BloqueoRango}) antes de confirmar
+     * una reserva o de construir la grilla de disponibilidad; esta clase no conoce nada
+     * sobre reservas, solo expone el dato para que el otro microservicio decida.
+     */
     @Override
     @Transactional
     public MantenimientoResponse bloquear(UUID canchaId, MantenimientoRequest request) {

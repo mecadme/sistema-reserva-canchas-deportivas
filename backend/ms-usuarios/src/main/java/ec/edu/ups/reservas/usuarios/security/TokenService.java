@@ -10,6 +10,13 @@ import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
+/**
+ * Único emisor de JWT del sistema (secc. 4.4: autenticación básica con roles, sin OAuth2/SSO).
+ * El claim {@code roles} (un solo rol por usuario: ADMINISTRADOR o USUARIO) es lo que los
+ * demás microservicios usan como servidores de recursos para decidir autorización de rol
+ * (p.ej. {@code hasRole("ADMINISTRADOR")}); todos comparten el mismo secreto HS256
+ * ({@code JWT_SECRET}) para poder validar el token sin llamar de vuelta a ms-usuarios.
+ */
 @Service
 public class TokenService {
     private final JwtEncoder encoder;

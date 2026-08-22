@@ -25,6 +25,14 @@ function mapRol(rol: UsuarioResponse['rol']): UserRole {
   return rol === 'ADMINISTRADOR' ? 'admin' : 'cliente';
 }
 
+/**
+ * Único punto de autenticación del shell (secc. 4.1: el shell orquesta "layout, navegación,
+ * autenticación"). Solo vive aquí porque es el host de Module Federation: la sesión
+ * (usuario + token) se guarda en `localStorage` para sobrevivir recargas y se expone como
+ * signal para que guards, interceptor y layout reaccionen a login/logout sin recargar la app.
+ * Los microfrontends remotos no implementan su propio login; consumen esta sesión indirectamente
+ * a través de las llamadas HTTP que pasan por {@link authInterceptor}.
+ */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -78,6 +86,9 @@ export class AuthService {
     localStorage.removeItem(SESSION_KEY);
   }
 
+  // ms-usuarios/auth/login solo devuelve el JWT, no el perfil del usuario; por eso se
+  // encadena una segunda llamada a /usuarios/me (con el token recién emitido) para poder
+  // conocer el rol y así decidir a qué rutas (RN de la secc. 3.1) puede navegar el usuario.
   private buildSession(token: TokenResponse): Observable<AuthSession> {
     return this.http
       .get<UsuarioResponse>(`${environment.usuariosApiUrl}/api/v1/usuarios/me`, {

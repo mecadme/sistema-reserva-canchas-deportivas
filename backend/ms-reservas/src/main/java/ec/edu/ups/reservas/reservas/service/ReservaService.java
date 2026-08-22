@@ -17,6 +17,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Implementa el proceso de reserva descrito en el Alcance Funcional (secc. 3.3.2/3.3.3)
+ * y las reglas de negocio RN-01 a RN-08. Es el único punto donde se decide si un bloque
+ * horario puede reservarse o cancelarse; {@code ms-canchas} solo aporta los datos de la
+ * cancha (horario de atención, estado, bloqueos de mantenimiento) vía {@link CanchaServicePort}.
+ */
 @Service
 public class ReservaService implements ReservaUseCase {
 
@@ -38,6 +44,19 @@ public class ReservaService implements ReservaUseCase {
         this.zoneId = ZoneId.of(zoneId);
     }
 
+    /**
+     * Crea una reserva (RN-01: cancha + fecha + bloque fijo de {@code slotMinutes}).
+     * <p>
+     * La validación de solapamiento (RN-02) es de doble capa, a propósito:
+     * 1) aquí arriba no se hace ningún "SELECT ocupados" porque eso sería vulnerable a
+     *    condiciones de carrera entre dos solicitudes concurrentes sobre el mismo slot;
+     * 2) la garantía real la da un índice único {@code (cancha_id, inicio)} en la tabla
+     *    {@code reservas} (ver migración Flyway), y aquí solo se atrapa el conflicto que
+     *    Postgres reporta como {@link DataIntegrityViolationException} y se traduce a 409.
+     * Por eso el nombre y el deporte de la cancha se copian ("snapshot") dentro de la
+     * reserva: si luego un admin renombra o inactiva la cancha, el historial y los
+     * reportes no cambian retroactivamente.
+     */
     @Override
     @Transactional
     public ReservaResponse crear(UUID usuarioId, CrearReservaRequest request) {
@@ -69,6 +88,13 @@ public class ReservaService implements ReservaUseCase {
         return repository.findAll().stream().map(ReservaResponse::from).toList();
     }
 
+    /**
+     * Cancela una reserva (RN-03: dueño o administrador; RN-04: solo si aún no inició).
+     * RN-05 ("toda cancelación libera el bloque automáticamente") no requiere lógica
+     * adicional aquí: {@link #construirSlots} y el conteo de {@link #disponibilidad}
+     * solo consideran reservas en estado {@code CONFIRMADA}, así que en cuanto el estado
+     * cambia a {@code CANCELADA} el bloque vuelve a verse disponible en la siguiente consulta.
+     */
     @Override
     @Transactional
     public ReservaResponse cancelar(UUID id, UUID actorId, boolean administrador, String motivo) {
@@ -86,6 +112,13 @@ public class ReservaService implements ReservaUseCase {
         return ReservaResponse.from(repository.save(reserva));
     }
 
+    /**
+     * Arma la grilla de disponibilidad de la pantalla "Consulta de disponibilidad" (secc. 3.3.1).
+     * {@code inicioDia}/{@code finDia} se calculan en la zona horaria del negocio
+     * ({@code business.zone-id}, por defecto America/Guayaquil) y luego se convierten a
+     * {@link OffsetDateTime} para poder compararlos contra columnas timestamptz sin ambigüedad
+     * de huso horario, sin importar en qué zona corra el servidor.
+     */
     @Override
     @Transactional(readOnly = true)
     public DisponibilidadResponse disponibilidad(UUID canchaId, LocalDate fecha) {
@@ -124,12 +157,27 @@ public class ReservaService implements ReservaUseCase {
                 porDeporte);
     }
 
+    /**
+     * RN-08: mueve a FINALIZADA toda reserva CONFIRMADA cuya hora de inicio ya pasó, para que
+     * el estado sea trazable en reportes. Se invoca cada minuto desde {@link FinalizadorJob};
+     * es una actualización masiva vía JPQL (no carga entidades) porque el volumen esperado no
+     * justifica traer filas a memoria solo para cambiarles el estado.
+     */
     @Override
     @Transactional
     public void finalizarVencidas() {
         repository.finalizarVencidas(OffsetDateTime.now(), EstadoReserva.CONFIRMADA, EstadoReserva.FINALIZADA);
     }
 
+    /**
+     * Genera los bloques de {@code slotMinutes} entre la apertura y el cierre de la cancha
+     * para un día, marcando cada uno como DISPONIBLE, OCUPADO (reserva CONFIRMADA solapada)
+     * o BLOQUEADO (cancha inactiva o con mantenimiento solapado, secc. 3.3.4/RN-07).
+     * La condición {@code r.inicio < slotFin && r.fin > slotInicio} es la prueba estándar de
+     * solapamiento de intervalos semiabiertos [inicio, fin); se reutiliza igual para los
+     * bloqueos de mantenimiento. BLOQUEADO tiene prioridad sobre OCUPADO porque una cancha
+     * inactiva/en mantenimiento nunca debe ofrecerse como reservable aunque no tenga reservas.
+     */
     private List<SlotResponse> construirSlots(CanchaDetalle cancha,
                                                List<RangoBloqueo> bloqueosDia,
                                                List<Reserva> reservasConfirmadas,
@@ -152,6 +200,7 @@ public class ReservaService implements ReservaUseCase {
         return slots;
     }
 
+    /** RN-06: tope de reservas CONFIRMADAS y futuras por usuario ({@code business.max-active-reservations}). */
     private void validarLimiteReservas(UUID usuarioId) {
         long activas = repository.countByUsuarioIdAndEstadoAndInicioAfter(
                 usuarioId, EstadoReserva.CONFIRMADA, OffsetDateTime.now());
@@ -161,6 +210,11 @@ public class ReservaService implements ReservaUseCase {
         }
     }
 
+    /**
+     * RN-01: el bloque debe iniciar en el futuro, en una hora exacta (alineado a la grilla
+     * de {@link #construirSlots}) y no cruzar la medianoche, para que "fecha" siga siendo
+     * un concepto de un solo día tanto en la reserva como en los reportes de ocupación.
+     */
     private void validarBloque(OffsetDateTime inicio, OffsetDateTime fin) {
         if (!inicio.isAfter(OffsetDateTime.now())) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "La reserva debe iniciar en el futuro");
@@ -173,6 +227,13 @@ public class ReservaService implements ReservaUseCase {
         }
     }
 
+    /**
+     * Repite del lado de {@code ms-reservas} las condiciones que definen si una cancha es
+     * reservable (activa, sin bloqueo de mantenimiento vigente RN-07, dentro del horario de
+     * atención). Es necesario porque, al ser microservicios independientes con bases de datos
+     * separadas (secc. 4.2/4.3), {@code ms-reservas} no puede consultar directamente las
+     * tablas de {@code canchas_db}: solo confía en el snapshot que devuelve {@link CanchaServicePort}.
+     */
     private void validarCancha(CanchaDetalle cancha, OffsetDateTime inicio, OffsetDateTime fin) {
         if (!cancha.activa()) {
             throw new ApiException(HttpStatus.CONFLICT, "La cancha está inactiva");
