@@ -2,6 +2,8 @@
 
 Backend compuesto por cuatro microservicios Spring Boot independientes. Cada servicio es dueño de su base PostgreSQL y se integra exclusivamente mediante API REST.
 
+El backend completo ha sido levantado junto con PostgreSQL y el frontend mediante Docker Compose. Los flujos principales han sido validados funcionalmente; las pruebas automatizadas end-to-end permanecen pendientes.
+
 | Servicio | Puerto | Base | Responsabilidad |
 | --- | ---: | --- | --- |
 | `ms-usuarios` | 8081 | `usuarios_db` | Registro, autenticación JWT, usuarios y roles |
@@ -35,14 +37,20 @@ Credenciales de demostración:
 
 - Administrador: `admin@canchas.local` / `Admin123*`
 
+Esta cuenta y su contraseña son exclusivamente para el entorno local de demostración. En cualquier otro ambiente deben reemplazarse mediante las variables de entorno correspondientes.
+
 ## Compilación y pruebas
 
 ```bash
 mvn clean verify
 ```
 
+El reactor incluye pruebas unitarias iniciales. La cobertura end-to-end del sistema completo se realizará en una fase posterior.
+
 La planificación de desarrollo está definida en [SPRINTS.md](SPRINTS.md).
 
 ## Comunicación interna
 
-Los endpoints `/internal/**` requieren la cabecera `X-Service-Key`. El valor se entrega mediante `SERVICE_API_KEY` y nunca debe confirmarse en el repositorio para un ambiente real.
+Los endpoints `/internal/**` requieren la cabecera `X-Service-Key`. El valor se entrega mediante `SERVICE_API_KEY` y nunca debe confirmarse en el repositorio para un ambiente real. El valor incluido en la colección Postman es únicamente una muestra local y debe reemplazarse fuera del entorno de demostración.
+
+No se utiliza API Gateway/BFF. Los microfrontends consumen directamente las API públicas y la comunicación entre microservicios se realiza de forma directa mediante los endpoints internos.

@@ -16,4 +16,13 @@ pnpm install
 pnpm start
 ```
 
-Sirve en http://localhost:4201. Expone `./Component` (componente raíz) para ser consumido por `shell`.
+Sirve en http://localhost:4201. Expone `./Routes` para ser cargado por el `shell` en la ruta `/clientes`.
+
+Consume las API reales de `ms-canchas` y `ms-reservas` para:
+
+- Consultar canchas y disponibilidad por fecha.
+- Crear una reserva.
+- Consultar las reservas propias.
+- Cancelar una reserva válida.
+
+El flujo funcional está validado manualmente; las pruebas automatizadas end-to-end permanecen pendientes.

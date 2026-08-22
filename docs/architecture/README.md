@@ -49,7 +49,7 @@ flowchart TB
     MsReportes -- "REST interno<br/>X-Service-Key" --> MsCanchas
 ```
 
-**Estado actual:** el frontend está completo e integrado vía Module Federation, y hace llamadas HTTP reales a los 4 microservicios (login/registro, disponibilidad, reservas, canchas, usuarios y reportes) — ya no opera en modo mock.
+**Estado actual:** el frontend está completo e integrado vía Module Federation y hace llamadas HTTP reales a los cuatro microservicios (login/registro, disponibilidad, reservas, canchas, usuarios y reportes). El sistema ha sido levantado y validado funcionalmente; las pruebas automatizadas end-to-end permanecen pendientes.
 
 ## 2. Diagrama de microfrontends (Module Federation)
 
@@ -174,8 +174,16 @@ erDiagram
 |---|---|---|
 | 2026-08 | Angular 20 (standalone components) + Webpack 5 vía `@angular-architects/module-federation` | Angular CLI usa esbuild/Vite por defecto, pero Module Federation requiere el runtime de Webpack |
 | 2026-08 | Java 17, Spring Boot, Maven multi-módulo, arquitectura hexagonal (`domain/port/in`, `domain/port/out`) en cada microservicio | Separar reglas de negocio de infraestructura (JPA, REST) facilita testear RN-01 a RN-08 de forma aislada |
-| 2026-08 | Sin API Gateway/BFF | El PDF lo marca como opcional; con 4 servicios el frontend puede llamarlos directo sin sobre-ingeniería |
+| 2026-08 | Sin API Gateway/BFF | Decisión confirmada por el equipo: los microfrontends consumen directamente las API públicas y los servicios se comunican por REST mediante endpoints internos protegidos |
 | 2026-08 | RN-02 aplicada con constraint `EXCLUDE` en PostgreSQL, no solo validación en Java | Garantiza la regla bajo condiciones de carrera concurrentes, que una validación solo en código no puede prevenir |
 | 2026-08 | Frontend construido primero en modo mock (`localStorage`), luego conectado a los 4 microservicios reales vía `HttpClient` | Permitió avanzar y validar UX/flujos de Module Federation en paralelo al desarrollo del backend, sin bloquear a ningún frente |
 | 2026-08 | CORS habilitado explícitamente en los 4 microservicios, restringido al origen del `shell` (`http://localhost:4300`) | Necesario porque el navegador bloquea peticiones cross-origin por defecto; se limita al único origen que hace llamadas reales |
 | 2026-08 | `spring-boot-starter-flyway` agregado a los 4 microservicios (además de `flyway-core`) | Spring Boot 4.1.0 movió el auto-configure de Flyway a un módulo separado; sin este starter, Flyway nunca se ejecutaba y Hibernate generaba el schema sin los constraints de negocio (ej. `EXCLUDE` de RN-02) |
+
+## 6. Estado de validación
+
+- Los contenedores del sistema completo se han levantado mediante Docker Compose.
+- Los flujos funcionales principales han sido comprobados manualmente con el frontend y las API reales.
+- Swagger está disponible para los cuatro microservicios.
+- La colección Postman cubre los endpoints y un flujo funcional completo.
+- Las pruebas automatizadas end-to-end quedan fuera del estado validado actual y se realizarán en una fase posterior.

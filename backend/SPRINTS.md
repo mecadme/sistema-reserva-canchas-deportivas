@@ -2,6 +2,8 @@
 
 La planificación considera sprints de dos semanas. Cada incremento debe compilar, incluir pruebas y mantener actualizado Swagger/OpenAPI.
 
+**Estado actual:** los sprints 0 a 4 están implementados y el backend ha sido levantado y validado funcionalmente. Permanecen pendientes las pruebas automatizadas end-to-end y la consolidación posterior de evidencias de pruebas.
+
 ## Sprint 0 - Base técnica
 
 - Acordar Java 17, Spring Boot 4.1, Maven y convenciones REST.

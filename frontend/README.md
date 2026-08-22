@@ -14,7 +14,9 @@ El frontend es un `shell` host y tres remotes integrados en tiempo de ejecución
 - Framework: Angular 20 (standalone components), gestor de paquetes **pnpm** (workspace único en esta carpeta, ver `pnpm-workspace.yaml`).
 - Module Federation: Webpack 5 vía `@angular-architects/module-federation`.
 - Sin librería visual: CSS propio.
-- Sesión: mock local (servicio de auth + localStorage) mientras no haya backend integrado.
+- Sesión: autenticación JWT real mediante `ms-usuarios`, conservada en `localStorage` por el `shell`.
+- Integración HTTP real con `ms-usuarios`, `ms-canchas`, `ms-reservas` y `ms-reportes`.
+- Sin API Gateway/BFF; cada microfrontend consume las API públicas que necesita.
 
 ## Instalación
 
@@ -46,9 +48,12 @@ Atajos equivalentes definidos en `package.json`: `pnpm clientes`, `pnpm administ
 | `mf-administracion` | 4202 | http://localhost:4202 (remoteEntry.js) |
 | `mf-reportes` | 4203 | http://localhost:4203 (remoteEntry.js) |
 
-## Acuerdos pendientes
+## Estado actual
 
-- Estrategia de pruebas unitarias y de integración.
-- Conexión HTTP real al backend (hoy las 4 apps operan en modo mock/`localStorage`).
+- Los cuatro proyectos construyen y se despliegan de forma independiente.
+- El `shell` carga los tres remotes en tiempo de ejecución.
+- Los flujos de autenticación, reservas, administración y reportes consumen el backend real.
+- El sistema completo ha sido levantado y validado funcionalmente.
+- Las pruebas automatizadas end-to-end permanecen pendientes.
 
 Cada aplicación puede construirse y desplegarse de forma independiente (ver `Dockerfile` en cada una), aunque comparten un único `pnpm-lock.yaml` a nivel de workspace.

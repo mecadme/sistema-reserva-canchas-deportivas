@@ -2,8 +2,6 @@
 
 Remote administrativo para gestionar canchas, horarios, bloqueos, usuarios y reservas globales.
 
-> Estado: scaffold base con Module Federation ya integrado al shell. Todavía no tiene pantallas funcionales — solo una página placeholder para validar el wiring end-to-end.
-
 ## Stack
 
 - Angular 20 (standalone components)
@@ -19,3 +17,12 @@ pnpm start
 ```
 
 Sirve en http://localhost:4202. Expone `./Routes` para ser consumido por `shell` en la ruta `/admin`.
+
+Consume las API reales de los microservicios para:
+
+- Crear, editar, activar e inactivar canchas.
+- Registrar bloqueos por mantenimiento.
+- Consultar y activar o inactivar usuarios.
+- Consultar todas las reservas y cancelarlas como administrador.
+
+El flujo funcional está validado manualmente; las pruebas automatizadas end-to-end permanecen pendientes.

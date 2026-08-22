@@ -39,9 +39,15 @@ Para usar la aplicación entra siempre por **http://localhost:4300** — es el �
 
 Para probar como cliente, regístrate desde la pantalla de registro del `shell` (`http://localhost:4300/registro`) — el registro siempre crea un usuario con rol `USUARIO`.
 
+Estas credenciales son exclusivamente para el entorno local de demostración. Antes de utilizar otro ambiente se deben reemplazar `BOOTSTRAP_ADMIN_PASSWORD`, `JWT_SECRET` y `SERVICE_API_KEY` mediante variables de entorno; nunca se deben versionar valores reales.
+
 ## Estado actual: frontend conectado al backend real
 
 El frontend hace llamadas HTTP reales a los 4 microservicios (login/registro vía `ms-usuarios`, disponibilidad y reservas vía `ms-reservas`, canchas vía `ms-canchas`, reportes vía `ms-reportes`). Ya no opera en modo mock. CORS está habilitado en los 4 servicios solo para el origen `http://localhost:4300` (el `shell`).
+
+El entorno completo ha sido levantado y los flujos principales han sido comprobados manualmente. Las pruebas automatizadas end-to-end permanecen pendientes.
+
+No se utiliza API Gateway/BFF: el frontend consume directamente las API públicas y los microservicios se comunican entre sí mediante endpoints REST internos protegidos con `X-Service-Key`.
 
 ## Ejecución sin Docker (modo desarrollo)
 

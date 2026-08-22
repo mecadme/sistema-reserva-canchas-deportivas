@@ -3,15 +3,15 @@
 ## Ramas
 
 - `main`: código estable y entregable.
-- `develop`: integración continua del equipo.
+- `integracion-completa-sistema`: integración continua del equipo.
 - `feat/<componente>-<descripcion>`: nueva funcionalidad.
 - `fix/<componente>-<descripcion>`: corrección.
 - `docs/<descripcion>`: documentación.
 - `chore/<descripcion>`: mantenimiento técnico.
 
-Ejemplos: `feat/ms-reservas-validar-solapamiento` y `feat/mf-reservas-calendario`.
+Ejemplos: `feat/ms-reservas-validar-solapamiento` y `feat/mf-clientes-calendario`.
 
-No se trabaja directamente sobre `main` ni `develop`. Antes de abrir un pull request, actualizar la rama con los cambios recientes de `develop`.
+No se trabaja directamente sobre `main` ni `integracion-completa-sistema`. Antes de abrir un pull request, actualizar la rama con los cambios recientes de `integracion-completa-sistema`.
 
 ## Commits
 
@@ -45,7 +45,7 @@ Una tarea se considera terminada cuando:
 - El código puede levantarse con instrucciones reproducibles.
 - La documentación y el contrato OpenAPI están actualizados.
 - No rompe los flujos existentes ni introduce secretos.
-- El pull request fue revisado e integrado en `develop`.
+- El pull request fue revisado e integrado en `integracion-completa-sistema`.
 
 ## Reglas de integración
 
