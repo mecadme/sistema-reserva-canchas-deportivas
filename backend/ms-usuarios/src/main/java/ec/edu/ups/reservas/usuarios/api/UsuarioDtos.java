@@ -18,7 +18,7 @@ public final class UsuarioDtos {
 
     public record LoginRequest(@NotBlank @Email String email, @NotBlank String password) {}
 
-    public record TokenResponse(String accessToken, String tokenType, long expiresInSeconds) {}
+    public record TokenResponse(String tokenAcceso, String tipoToken, long expiraEnSegundos) {}
 
     public record EstadoRequest(boolean activo) {}
 

@@ -15,5 +15,7 @@ public interface CanchaRepositoryPort {
 
     boolean existsByNombreIgnoreCase(String nombre);
 
+    boolean existsByNombreIgnoreCaseAndIdNot(String nombre, UUID id);
+
     Cancha save(Cancha cancha);
 }
