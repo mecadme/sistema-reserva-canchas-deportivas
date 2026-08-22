@@ -1,6 +1,7 @@
 services:
   usuarios-db:
     image: postgres:17-alpine
+    container_name: usuarios-db
     environment:
       POSTGRES_DB: usuarios_db
       POSTGRES_USER: ${POSTGRES_USER:-reservas}
@@ -14,6 +15,7 @@ services:
 
   canchas-db:
     image: postgres:17-alpine
+    container_name: canchas-db
     environment:
       POSTGRES_DB: canchas_db
       POSTGRES_USER: ${POSTGRES_USER:-reservas}
@@ -27,6 +29,7 @@ services:
 
   reservas-db:
     image: postgres:17-alpine
+    container_name: reservas-db
     environment:
       POSTGRES_DB: reservas_db
       POSTGRES_USER: ${POSTGRES_USER:-reservas}
@@ -40,6 +43,7 @@ services:
 
   reportes-db:
     image: postgres:17-alpine
+    container_name: reportes-db
     environment:
       POSTGRES_DB: reportes_db
       POSTGRES_USER: ${POSTGRES_USER:-reservas}
@@ -53,6 +57,7 @@ services:
 
   ms-usuarios:
     build: ../backend/ms-usuarios
+    container_name: ms-usuarios
     environment:
       DB_URL: jdbc:postgresql://usuarios-db:5432/usuarios_db
       DB_USERNAME: ${POSTGRES_USER:-reservas}
@@ -66,6 +71,7 @@ services:
 
   ms-canchas:
     build: ../backend/ms-canchas
+    container_name: ms-canchas
     environment:
       DB_URL: jdbc:postgresql://canchas-db:5432/canchas_db
       DB_USERNAME: ${POSTGRES_USER:-reservas}
@@ -78,6 +84,7 @@ services:
 
   ms-reservas:
     build: ../backend/ms-reservas
+    container_name: ms-reservas
     environment:
       DB_URL: jdbc:postgresql://reservas-db:5432/reservas_db
       DB_USERNAME: ${POSTGRES_USER:-reservas}
@@ -92,6 +99,7 @@ services:
 
   ms-reportes:
     build: ../backend/ms-reportes
+    container_name: ms-reportes
     environment:
       DB_URL: jdbc:postgresql://reportes-db:5432/reportes_db
       DB_USERNAME: ${POSTGRES_USER:-reservas}
@@ -110,24 +118,28 @@ services:
     build:
       context: ../frontend
       dockerfile: mf-clientes/Dockerfile
+    container_name: mf-clientes
     ports: ["4201:80"]
 
   mf-administracion:
     build:
       context: ../frontend
       dockerfile: mf-administracion/Dockerfile
+    container_name: mf-administracion
     ports: ["4202:80"]
 
   mf-reportes:
     build:
       context: ../frontend
       dockerfile: mf-reportes/Dockerfile
+    container_name: mf-reportes
     ports: ["4203:80"]
 
   shell:
     build:
       context: ../frontend
       dockerfile: shell/Dockerfile
+    container_name: shell
     ports: ["4300:80"]
     depends_on:
       - mf-clientes

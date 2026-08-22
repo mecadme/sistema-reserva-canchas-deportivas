@@ -7,9 +7,9 @@ import { AuthSession, AuthUser, UserRole } from './user.model';
 const SESSION_KEY = 'auth-session';
 
 interface TokenResponse {
-  accessToken: string;
-  tokenType: string;
-  expiresInSeconds: number;
+  tokenAcceso: string;
+  tipoToken: string;
+  expiraEnSegundos: number;
 }
 
 interface UsuarioResponse {
@@ -92,12 +92,12 @@ export class AuthService {
   private buildSession(token: TokenResponse): Observable<AuthSession> {
     return this.http
       .get<UsuarioResponse>(`${environment.usuariosApiUrl}/api/v1/usuarios/me`, {
-        headers: { Authorization: `${token.tokenType} ${token.accessToken}` },
+        headers: { Authorization: `${token.tipoToken} ${token.tokenAcceso}` },
       })
       .pipe(
         map((usuario) => ({
           user: { id: usuario.id, nombre: usuario.nombre, email: usuario.email, role: mapRol(usuario.rol) },
-          token: token.accessToken,
+          token: token.tokenAcceso,
         })),
       );
   }

@@ -8,6 +8,8 @@ public interface CanchaRepository extends JpaRepository<Cancha, UUID>, CanchaRep
 
     boolean existsByNombreIgnoreCase(String nombre);
 
+    boolean existsByNombreIgnoreCaseAndIdNot(String nombre, UUID id);
+
     @Override
     Cancha save(Cancha cancha);
 }
