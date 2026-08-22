@@ -61,6 +61,11 @@ public class Reserva {
         this.actualizadoEn = this.creadoEn;
     }
 
+    /**
+     * RN-05: cancelar solo cambia el estado (no borra la fila ni el rango horario), por lo
+     * que el bloque queda libre implícitamente en cuanto deja de estar en CONFIRMADA —
+     * ver {@code ReservaService#construirSlots}, que filtra por ese estado.
+     */
     public void cancelar(UUID actorId, String motivo) {
         this.estado = EstadoReserva.CANCELADA;
         this.canceladaPor = actorId;

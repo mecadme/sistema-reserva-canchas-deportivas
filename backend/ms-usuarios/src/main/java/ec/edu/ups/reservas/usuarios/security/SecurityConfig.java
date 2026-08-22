@@ -72,6 +72,11 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health", "/swagger-ui/**", "/swagger-ui.html",
                                 "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
+                        // /internal/** queda abierto a nivel de Spring Security (sin JWT) porque
+                        // las llamadas servicio-a-servicio (secc. 4.2) no tienen un usuario final
+                        // detrás; en su lugar, ServiceKeyInterceptor exige el header X-Service-Key
+                        // antes de que la petición llegue al controlador. No exponer /internal/**
+                        // a través del API Gateway/BFF público es responsabilidad de la capa de red.
                         .requestMatchers("/internal/**").permitAll()
                         .requestMatchers("/api/v1/usuarios/me").authenticated()
                         .requestMatchers("/api/v1/usuarios/**").hasRole("ADMINISTRADOR")
