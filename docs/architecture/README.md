@@ -2,6 +2,23 @@
 
 Este documento describe la arquitectura implementada: microfrontends con Module Federation en el frontend, microservicios Spring Boot en el backend, y una base de datos PostgreSQL independiente por servicio.
 
+## 0. Modelo C4 (Contexto y Contenedores) en Structurizr DSL
+
+El modelo formal C4 vive en [`c4/workspace.dsl`](c4/workspace.dsl) y es la fuente de verdad de los diagramas de **Contexto** (C1: Usuario Final / Administrador ↔ el sistema como caja negra) y **Contenedores** (C2: los 4 microfrontends, los 4 microservicios y sus 4 bases PostgreSQL, con las relaciones entre ellos). Los diagramas Mermaid de las secciones 1-3 de este documento son una vista renderizada equivalente, pensada para leerse directo en GitHub sin herramientas adicionales.
+
+Para visualizar o editar el DSL con el editor visual de Structurizr:
+
+```bash
+docker run --rm -p 8080:8080 -v "$(pwd)/docs/architecture/c4:/usr/local/structurizr" structurizr/lite
+# abrir http://localhost:8080
+```
+
+Para solo validar la sintaxis sin levantar el servidor:
+
+```bash
+docker run --rm -v "$(pwd)/docs/architecture/c4:/usr/local/structurizr" structurizr/cli validate -w workspace.dsl
+```
+
 ## 1. Diagrama de contenedores
 
 ```mermaid

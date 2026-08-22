@@ -11,6 +11,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.*;
 
+/**
+ * Adaptador de salida (arquitectura hexagonal: implementa {@link CanchaServicePort}) que
+ * concreta la comunicación entre microservicios descrita en la secc. 4.2 del alcance:
+ * "La comunicación entre microservicios, de ser necesaria, se realiza vía HTTP/REST de
+ * forma síncrona". {@code ms-reservas} no tiene acceso a las tablas de {@code canchas_db}
+ * (cada microservicio es dueño de su propia base, secc. 4.3), así que cada vez que necesita
+ * saber si una cancha existe, está activa o tiene un bloqueo de mantenimiento, se lo pregunta
+ * a {@code ms-canchas} llamando a sus endpoints {@code /internal/v1/canchas/**}.
+ * <p>
+ * Cada llamada envía el header {@code X-Service-Key} (validado por
+ * {@code ServiceKeyInterceptor} del lado de ms-canchas) porque estas rutas internas no
+ * exigen JWT de usuario. Si ms-canchas no responde o falla, se traduce a 503/502/404 en
+ * vez de dejar propagar la excepción de bajo nivel, para que quien llame a
+ * {@code ReservaService} reciba un error HTTP consistente con el resto de la API.
+ */
 @Component
 public class CanchaClient implements CanchaServicePort {
 
