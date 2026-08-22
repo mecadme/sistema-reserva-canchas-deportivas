@@ -60,7 +60,7 @@ public class ReservaService implements ReservaUseCase {
     @Override
     @Transactional
     public ReservaResponse crear(UUID usuarioId, CrearReservaRequest request) {
-        OffsetDateTime inicio = request.inicio();
+        OffsetDateTime inicio = request.inicio().atZoneSameInstant(zoneId).toOffsetDateTime();
         OffsetDateTime fin = inicio.plusMinutes(slotMinutes);
         validarBloque(inicio, fin);
         validarLimiteReservas(usuarioId);
@@ -214,6 +214,10 @@ public class ReservaService implements ReservaUseCase {
      * RN-01: el bloque debe iniciar en el futuro, en una hora exacta (alineado a la grilla
      * de {@link #construirSlots}) y no cruzar la medianoche, para que "fecha" siga siendo
      * un concepto de un solo día tanto en la reserva como en los reportes de ocupación.
+     * <p>
+     * {@code inicio}/{@code fin} ya llegan normalizados a {@code zoneId} (ver {@link #crear}),
+     * así que "mismo día" se evalúa en la zona horaria del negocio y no en el offset que
+     * mande el cliente ni en UTC.
      */
     private void validarBloque(OffsetDateTime inicio, OffsetDateTime fin) {
         if (!inicio.isAfter(OffsetDateTime.now())) {

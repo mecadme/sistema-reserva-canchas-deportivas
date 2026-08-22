@@ -52,6 +52,9 @@ public class CanchaService implements CanchaUseCase {
     @Transactional
     public CanchaResponse actualizar(UUID id, CanchaRequest request) {
         Cancha cancha = encontrar(id);
+        if (canchas.existsByNombreIgnoreCaseAndIdNot(request.nombre(), id)) {
+            throw new ApiException(HttpStatus.CONFLICT, "Ya existe una cancha con ese nombre");
+        }
         try {
             cancha.actualizar(request.nombre(), request.deporte(),
                     request.horaApertura(), request.horaCierre());
