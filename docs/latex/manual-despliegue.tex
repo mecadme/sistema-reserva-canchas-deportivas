@@ -1,0 +1,131 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{float}
+
+\geometry{margin=2.5cm}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+
+\lstdefinestyle{terminal}{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!8}
+}
+
+\newcommand{\evidenceimage}[3]{
+  \begin{figure}[H]
+    \centering
+    \IfFileExists{figures/#1}{\includegraphics[width=0.92\textwidth]{figures/#1}}{\fbox{\parbox[c][5cm][c]{0.86\textwidth}{\centering Captura pendiente: \texttt{figures/#1}}}}
+    \caption{#2}
+    \label{#3}
+  \end{figure}
+}
+
+\title{Manual de Despliegue Local\\Sistema de Reserva de Canchas Deportivas}
+\author{Enzo Aliatis \and Jordan Murillo \and Galo Suarez \and Mauro Cadme}
+\date{Agosto 2026}
+
+\begin{document}
+\maketitle
+
+\section{Objetivo}
+
+Este manual describe como levantar localmente el sistema completo de reserva de canchas deportivas. El entorno integra cuatro microservicios Spring Boot, cuatro bases PostgreSQL, un shell Angular y tres microfrontends remotos mediante Module Federation.
+
+\section{Prerequisitos}
+
+\begin{itemize}
+  \item Docker y Docker Compose.
+  \item Puertos libres: 4300, 4201, 4202, 4203, 8081, 8082, 8083 y 8084.
+  \item Git para clonar el repositorio.
+\end{itemize}
+
+\section{Servicios desplegados}
+
+\begin{longtable}{p{4cm}p{3cm}p{6cm}}
+\textbf{Componente} & \textbf{Puerto} & \textbf{Responsabilidad} \\
+\hline
+shell & 4300 & Punto de entrada, layout, autenticacion y navegacion. \\
+mf-clientes & 4201 & Disponibilidad, creacion y consulta de reservas del cliente. \\
+mf-administracion & 4202 & Gestion administrativa de canchas, usuarios y reservas. \\
+mf-reportes & 4203 & Consulta de reportes basicos. \\
+ms-usuarios & 8081 & Registro, login JWT, roles y usuarios. \\
+ms-canchas & 8082 & Canchas, deportes, horarios y bloqueos. \\
+ms-reservas & 8083 & Disponibilidad, reservas, cancelacion y reglas de negocio. \\
+ms-reportes & 8084 & Agregacion y auditoria de reportes. \\
+\end{longtable}
+
+\section{Ejecucion con Docker Compose}
+
+Desde la raiz del repositorio:
+
+\begin{lstlisting}[style=terminal]
+cp infra/.env.example infra/.env
+docker compose -f infra/docker-compose.yml up --build
+\end{lstlisting}
+
+La primera ejecucion puede tardar varios minutos porque construye imagenes Java y Angular. Las siguientes ejecuciones reutilizan cache de Docker.
+
+\section{URLs de acceso}
+
+\begin{longtable}{p{5cm}p{8cm}}
+\textbf{Servicio} & \textbf{URL} \\
+\hline
+Aplicacion web & \url{http://localhost:4300} \\
+Swagger ms-usuarios & \url{http://localhost:8081/swagger-ui.html} \\
+Swagger ms-canchas & \url{http://localhost:8082/swagger-ui.html} \\
+Swagger ms-reservas & \url{http://localhost:8083/swagger-ui.html} \\
+Swagger ms-reportes & \url{http://localhost:8084/swagger-ui.html} \\
+\end{longtable}
+
+\section{Credenciales de demostracion}
+
+\begin{longtable}{p{4cm}p{5cm}p{4cm}}
+\textbf{Rol} & \textbf{Correo} & \textbf{Clave} \\
+\hline
+Administrador & \texttt{admin@canchas.local} & \texttt{Admin123*} \\
+\end{longtable}
+
+Los usuarios cliente se crean desde la pantalla de registro. Las credenciales son solo para demostracion local; en otro ambiente deben reemplazarse las variables \texttt{BOOTSTRAP\_ADMIN\_PASSWORD}, \texttt{JWT\_SECRET} y \texttt{SERVICE\_API\_KEY}.
+
+\section{Verificacion rapida}
+
+\begin{enumerate}
+  \item Abrir \url{http://localhost:4300}.
+  \item Registrar un usuario cliente.
+  \item Consultar disponibilidad de una cancha.
+  \item Crear una reserva.
+  \item Consultar mis reservas.
+  \item Ingresar como administrador.
+  \item Revisar canchas, usuarios, reservas y reportes.
+  \item Abrir las cuatro interfaces Swagger.
+\end{enumerate}
+
+\evidenceimage{11-docker-compose.png}{Evidencia del entorno local desplegado con Docker Compose.}{fig:docker-compose}
+
+\section{Apagado del entorno}
+
+\begin{lstlisting}[style=terminal]
+docker compose -f infra/docker-compose.yml down
+\end{lstlisting}
+
+Para eliminar tambien los volumenes de PostgreSQL y perder los datos locales:
+
+\begin{lstlisting}[style=terminal]
+docker compose -f infra/docker-compose.yml down -v
+\end{lstlisting}
+
+\section{Observaciones}
+
+El sistema no utiliza API Gateway ni BFF. Los microfrontends consumen las API publicas de los microservicios y los microservicios se comunican entre si mediante endpoints internos protegidos con la cabecera \texttt{X-Service-Key}.
+
+\end{document}
+
