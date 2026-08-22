@@ -2,6 +2,12 @@ import { Routes } from '@angular/router';
 import { guestGuard } from './core/auth/guest.guard';
 import { roleGuard } from './core/auth/role.guard';
 
+// Mapea los roles/permisos de la secc. 3.1: 'clientes' (Usuario Final) solo lo puede
+// activar un rol 'cliente'; 'admin' y 'reportes' solo un rol 'admin'. Cada rama usa
+// `loadChildren` apuntando a un especificador tipo `mfX/Routes` en vez de una ruta de
+// archivo: eso es lo que Module Federation resuelve en tiempo de ejecución contra el
+// remoteEntry.js configurado en webpack.config.js, así que estos remotes no se compilan
+// dentro del bundle del shell — solo se descargan cuando el usuario navega ahí.
 export const routes: Routes = [
   {
     path: '',
@@ -32,6 +38,11 @@ export const routes: Routes = [
         path: 'admin',
         canActivate: [roleGuard(['admin'])],
         loadChildren: () => import('mfAdministracion/Routes').then((m) => m.routes),
+      },
+      {
+        path: 'reportes',
+        canActivate: [roleGuard(['admin'])],
+        loadChildren: () => import('mfReportes/Routes').then((m) => m.routes),
       },
     ],
   },

@@ -55,6 +55,15 @@
   font-size: 0.9rem;
 }
 
+.reservation__error {
+  color: var(--color-danger);
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: #fdecea;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+}
+
 .option-grid {
   display: flex;
   flex-wrap: wrap;

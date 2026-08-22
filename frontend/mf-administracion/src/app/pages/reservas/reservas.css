@@ -1,0 +1,118 @@
+.reservas-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.reservas-header h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.reservas-header p {
+  margin-top: 0.35rem;
+  color: var(--color-ink-soft);
+  font-size: 0.95rem;
+}
+
+.reservas-status {
+  color: var(--color-ink-soft);
+  font-size: 0.9rem;
+}
+
+.reservas-status--error {
+  color: var(--color-danger);
+  font-weight: 600;
+  background: #fdecea;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+}
+
+.reservas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.reserva-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.reserva-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.reserva-card__emoji {
+  font-size: 1.8rem;
+}
+
+.reserva-card__estado {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.reserva-card__estado--cancelada {
+  background: #fdecea;
+  color: var(--color-danger);
+}
+
+.reserva-card__estado--finalizada {
+  background: #eef1f0;
+  color: var(--color-ink-soft);
+}
+
+.reserva-card h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.reserva-card__usuario {
+  color: var(--color-ink-soft);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.reserva-card__fecha {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.reserva-card__cancel {
+  margin-top: 0.75rem;
+  padding: 0.55rem 1rem;
+  border: 2px solid var(--color-danger);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-danger);
+  font-weight: 700;
+  font-size: 0.85rem;
+  transition: background-color 0.15s ease;
+}
+
+.reserva-card__cancel:hover:not(:disabled) {
+  background: #fdecea;
+}
+
+.reserva-card__cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

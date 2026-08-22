@@ -1,0 +1,21 @@
+const { shareAll, withModuleFederationPlugin } = require('@angular-architects/module-federation/webpack');
+
+module.exports = {
+  ...withModuleFederationPlugin({
+
+    name: 'mfReportes',
+
+    exposes: {
+      './Routes': './src/app/app.routes.ts',
+    },
+
+    shared: {
+      ...shareAll({ singleton: true, strictVersion: true, requiredVersion: 'auto' }),
+    },
+
+  }),
+
+  output: {
+    publicPath: 'http://localhost:4203/',
+  },
+};

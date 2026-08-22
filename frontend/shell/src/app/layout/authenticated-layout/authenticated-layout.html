@@ -10,6 +10,10 @@
     }
   </header>
 
+  @if (user()?.user?.role === 'admin') {
+    <app-admin-nav />
+  }
+
   <main class="shell-content">
     <router-outlet />
   </main>

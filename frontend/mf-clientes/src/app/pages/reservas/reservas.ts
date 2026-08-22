@@ -16,6 +16,7 @@ export class Reservas implements OnInit {
   protected readonly reservations = signal<Reservation[]>([]);
   protected readonly loading = signal(false);
   protected readonly cancelingIds = signal<Set<string>>(new Set());
+  protected readonly cancelError = signal<string | null>(null);
 
   protected readonly confirmedReservationsCount = computed(
     () => this.reservations().filter((r) => r.estado === 'Confirmada').length,
@@ -42,18 +43,27 @@ export class Reservas implements OnInit {
       return;
     }
     this.cancelingIds.update((current) => new Set(current).add(id));
+    this.cancelError.set(null);
 
-    this.reservationsService.cancel(id).subscribe((cancelled) => {
-      this.cancelingIds.update((current) => {
-        const next = new Set(current);
-        next.delete(id);
-        return next;
-      });
-      if (cancelled) {
+    this.reservationsService.cancel(id).subscribe({
+      next: (cancelled) => {
+        this.cancelingIds.update((current) => {
+          const next = new Set(current);
+          next.delete(id);
+          return next;
+        });
         this.reservations.update((current) =>
           current.map((reservation) => (reservation.id === id ? cancelled : reservation)),
         );
-      }
+      },
+      error: (err: Error) => {
+        this.cancelingIds.update((current) => {
+          const next = new Set(current);
+          next.delete(id);
+          return next;
+        });
+        this.cancelError.set(err.message);
+      },
     });
   }
 

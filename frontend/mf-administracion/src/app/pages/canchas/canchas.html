@@ -1,0 +1,125 @@
+<div class="canchas-page">
+  <header class="canchas-header">
+    <div>
+      <h1>Gestión de canchas</h1>
+      <p>Crea, edita e inactiva canchas, y registra bloqueos por mantenimiento.</p>
+    </div>
+    <button type="button" class="btn-primary" (click)="abrirNuevaCancha()">+ Nueva cancha</button>
+  </header>
+
+  @if (formOpen()) {
+    <section class="cancha-form">
+      <h2>{{ editingId() ? 'Editar cancha' : 'Nueva cancha' }}</h2>
+
+      <div class="cancha-form__grid">
+        <label class="field">
+          <span>Nombre</span>
+          <input type="text" [value]="formNombre()" (input)="formNombre.set($any($event.target).value)" placeholder="Cancha Pádel 2" />
+        </label>
+
+        <label class="field">
+          <span>Deporte</span>
+          <select [value]="formDeporte()" (change)="formDeporte.set($any($event.target).value)">
+            @for (deporte of deportes; track deporte) {
+              <option [value]="deporte">{{ deporteLabels[deporte] }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Hora de apertura</span>
+          <input type="time" [value]="formApertura()" (input)="formApertura.set($any($event.target).value)" />
+        </label>
+
+        <label class="field">
+          <span>Hora de cierre</span>
+          <input type="time" [value]="formCierre()" (input)="formCierre.set($any($event.target).value)" />
+        </label>
+      </div>
+
+      @if (formError()) {
+        <p class="form-error">{{ formError() }}</p>
+      }
+
+      <div class="cancha-form__actions">
+        <button type="button" class="btn-ghost" (click)="cerrarFormulario()">Cancelar</button>
+        <button type="button" class="btn-primary" [disabled]="formSaving()" (click)="guardarCancha()">
+          {{ formSaving() ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </section>
+  }
+
+  @if (loading()) {
+    <p class="canchas-status">Cargando canchas...</p>
+  } @else {
+    <div class="canchas-grid">
+      @for (cancha of canchas(); track cancha.id) {
+        <article class="cancha-card" [class.cancha-card--inactiva]="!cancha.activa">
+          <div class="cancha-card__top">
+            <h2>{{ cancha.nombre }}</h2>
+            <span class="badge" [class.badge--inactiva]="!cancha.activa">
+              {{ cancha.activa ? 'Activa' : 'Inactiva' }}
+            </span>
+          </div>
+          <p class="cancha-card__deporte">{{ deporteLabels[cancha.deporte] }}</p>
+          <p class="cancha-card__horario">{{ cancha.horaApertura }} - {{ cancha.horaCierre }}</p>
+
+          <div class="cancha-card__actions">
+            <button type="button" class="btn-ghost" (click)="editarCancha(cancha)">Editar</button>
+            <button
+              type="button"
+              class="btn-ghost"
+              [disabled]="isSaving(cancha.id)"
+              (click)="cambiarEstado(cancha)"
+            >
+              {{ cancha.activa ? 'Inactivar' : 'Activar' }}
+            </button>
+            <button type="button" class="btn-ghost" (click)="toggleBloqueos(cancha.id)">
+              {{ bloqueoCanchaId() === cancha.id ? 'Ocultar bloqueos' : 'Bloqueos' }}
+            </button>
+          </div>
+
+          @if (bloqueoCanchaId() === cancha.id) {
+            <div class="bloqueos">
+              @if (bloqueosDe(cancha.id).length === 0) {
+                <p class="bloqueos__empty">Sin bloqueos de mantenimiento registrados.</p>
+              } @else {
+                <ul class="bloqueos__list">
+                  @for (bloqueo of bloqueosDe(cancha.id); track bloqueo.id) {
+                    <li>
+                      <span class="bloqueos__rango">{{ bloqueo.desde }} → {{ bloqueo.hasta }}</span>
+                      <span class="bloqueos__motivo">{{ bloqueo.motivo }}</span>
+                    </li>
+                  }
+                </ul>
+              }
+
+              <div class="bloqueo-form">
+                <label class="field">
+                  <span>Desde</span>
+                  <input type="datetime-local" [value]="bloqueoDesde()" (input)="bloqueoDesde.set($any($event.target).value)" />
+                </label>
+                <label class="field">
+                  <span>Hasta</span>
+                  <input type="datetime-local" [value]="bloqueoHasta()" (input)="bloqueoHasta.set($any($event.target).value)" />
+                </label>
+                <label class="field field--motivo">
+                  <span>Motivo</span>
+                  <input type="text" [value]="bloqueoMotivo()" (input)="bloqueoMotivo.set($any($event.target).value)" placeholder="Mantenimiento de red" />
+                </label>
+                <button type="button" class="btn-primary" [disabled]="bloqueoSaving()" (click)="crearBloqueo(cancha.id)">
+                  {{ bloqueoSaving() ? 'Guardando...' : 'Agregar bloqueo' }}
+                </button>
+              </div>
+
+              @if (bloqueoError()) {
+                <p class="form-error">{{ bloqueoError() }}</p>
+              }
+            </div>
+          }
+        </article>
+      }
+    </div>
+  }
+</div>

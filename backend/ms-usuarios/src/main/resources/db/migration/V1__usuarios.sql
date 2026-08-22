@@ -1,0 +1,12 @@
+CREATE TABLE usuarios (
+    id UUID PRIMARY KEY,
+    nombre VARCHAR(120) NOT NULL,
+    email VARCHAR(180) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    rol VARCHAR(30) NOT NULL CHECK (rol IN ('USUARIO', 'ADMINISTRADOR')),
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    creado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_usuarios_rol_activo ON usuarios (rol, activo);

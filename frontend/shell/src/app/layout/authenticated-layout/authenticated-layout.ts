@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { AdminNav } from '../../shared/admin-nav/admin-nav';
 
 @Component({
   selector: 'app-authenticated-layout',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, AdminNav],
   templateUrl: './authenticated-layout.html',
   styleUrl: './authenticated-layout.css',
 })

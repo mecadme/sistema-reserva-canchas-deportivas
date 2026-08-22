@@ -1,0 +1,95 @@
+<div class="reportes-page">
+  <header class="reportes-header">
+    <h1>Reportes de ocupación</h1>
+    <p>Indicadores de uso del sistema por rango de fechas.</p>
+  </header>
+
+  <section class="filtros">
+    <label class="field">
+      <span>Desde</span>
+      <input type="date" [value]="desde()" (input)="setDesde($any($event.target).value)" />
+    </label>
+    <label class="field">
+      <span>Hasta</span>
+      <input type="date" [value]="hasta()" (input)="setHasta($any($event.target).value)" />
+    </label>
+    <button type="button" class="btn-primary" [disabled]="loading()" (click)="generar()">
+      {{ loading() ? 'Generando...' : 'Generar reporte' }}
+    </button>
+  </section>
+
+  @if (error()) {
+    <p class="reportes-status reportes-status--error">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="reportes-status">Calculando indicadores...</p>
+  } @else if (reporte(); as data) {
+    <div class="reportes-grid">
+      <article class="stat-card">
+        <span class="stat-card__value">{{ data.total }}</span>
+        <span class="stat-card__label">Reservas en el período</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-card__value">{{ data.confirmadas }}</span>
+        <span class="stat-card__label">Confirmadas</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-card__value">{{ data.canceladas }}</span>
+        <span class="stat-card__label">Cancelaciones</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-card__value">{{ data.finalizadas }}</span>
+        <span class="stat-card__label">Finalizadas</span>
+      </article>
+    </div>
+
+    <section class="panel">
+      <h2>Ocupación por cancha</h2>
+      <div class="ocupacion-list">
+        @for (item of data.ocupacionPorCancha; track item.canchaNombre) {
+          <div class="ocupacion-row">
+            <span class="ocupacion-row__nombre">{{ item.canchaNombre }}</span>
+            <div class="ocupacion-row__bar">
+              <div class="ocupacion-row__fill" [style.width.%]="item.porcentajeOcupacion"></div>
+            </div>
+            <span class="ocupacion-row__valor">{{ item.porcentajeOcupacion }}%</span>
+            <span class="ocupacion-row__detalle">{{ item.reservasOcupadas }} / {{ item.bloquesDisponibles }} bloques</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Reservas por deporte</h2>
+      <div class="deportes-grid">
+        @for (entry of deportesEntries(); track entry[0]) {
+          <div class="deporte-card">
+            <span class="deporte-card__nombre">{{ deporteLabels[entry[0]] ?? entry[0] }}</span>
+            <span class="deporte-card__valor">{{ entry[1] }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Demanda</h2>
+      <div class="demanda-grid">
+        @if (canchaMasDemandada(); as top) {
+          <div class="demanda-card demanda-card--top">
+            <span class="demanda-card__label">Mayor demanda</span>
+            <span class="demanda-card__nombre">{{ top.canchaNombre }}</span>
+            <span class="demanda-card__valor">{{ top.porcentajeOcupacion }}% ocupación</span>
+          </div>
+        }
+        @if (canchaMenosDemandada(); as bottom) {
+          <div class="demanda-card demanda-card--bottom">
+            <span class="demanda-card__label">Menor demanda</span>
+            <span class="demanda-card__nombre">{{ bottom.canchaNombre }}</span>
+            <span class="demanda-card__valor">{{ bottom.porcentajeOcupacion }}% ocupación</span>
+          </div>
+        }
+      </div>
+    </section>
+  }
+</div>
