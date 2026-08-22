@@ -1,0 +1,687 @@
+{
+  "info": {
+    "name": "Reserva Canchas - Backend",
+    "description": "Colección completa para los 4 microservicios: ms-usuarios, ms-canchas, ms-reservas y ms-reportes",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "usuarios_url", "value": "http://localhost:8081" },
+    { "key": "canchas_url",  "value": "http://localhost:8082" },
+    { "key": "reservas_url", "value": "http://localhost:8083" },
+    { "key": "reportes_url", "value": "http://localhost:8084" },
+    { "key": "token",        "value": "" },
+    { "key": "cancha_id",    "value": "" },
+    { "key": "reserva_id",   "value": "" },
+    { "key": "usuario_id",   "value": "" },
+    { "key": "service_key",  "value": "clave-secreta-inter-servicios" }
+  ],
+  "item": [
+    {
+      "name": "01 · ms-usuarios",
+      "item": [
+        {
+          "name": "Auth",
+          "item": [
+            {
+              "name": "Registro de usuario",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": { "raw": "{{usuarios_url}}/api/v1/auth/registro", "host": ["{{usuarios_url}}"], "path": ["api","v1","auth","registro"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Juan Pérez\",\n  \"email\": \"juan@example.com\",\n  \"password\": \"password123\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "  const body = pm.response.json();",
+                      "  pm.collectionVariables.set('usuario_id', body.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Login usuario",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": { "raw": "{{usuarios_url}}/api/v1/auth/login", "host": ["{{usuarios_url}}"], "path": ["api","v1","auth","login"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"juan@example.com\",\n  \"password\": \"password123\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  pm.collectionVariables.set('token', body.accessToken);",
+                      "  console.log('Token guardado:', body.accessToken);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Login admin",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": { "raw": "{{usuarios_url}}/api/v1/auth/login", "host": ["{{usuarios_url}}"], "path": ["api","v1","auth","login"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@canchas.local\",\n  \"password\": \"Admin1234!\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  pm.collectionVariables.set('token', body.accessToken);",
+                      "  console.log('Token admin guardado');",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Usuarios",
+          "item": [
+            {
+              "name": "Mi perfil (me)",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{usuarios_url}}/api/v1/usuarios/me", "host": ["{{usuarios_url}}"], "path": ["api","v1","usuarios","me"] }
+              }
+            },
+            {
+              "name": "Listar todos los usuarios (ADMIN)",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{usuarios_url}}/api/v1/usuarios", "host": ["{{usuarios_url}}"], "path": ["api","v1","usuarios"] }
+              }
+            },
+            {
+              "name": "Cambiar estado de usuario (ADMIN)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "url": { "raw": "{{usuarios_url}}/api/v1/usuarios/{{usuario_id}}/estado", "host": ["{{usuarios_url}}"], "path": ["api","v1","usuarios","{{usuario_id}}","estado"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"activo\": false\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Internal (inter-servicios)",
+          "item": [
+            {
+              "name": "Obtener usuario por ID [internal]",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "X-Service-Key", "value": "{{service_key}}" }],
+                "url": { "raw": "{{usuarios_url}}/internal/v1/usuarios/{{usuario_id}}", "host": ["{{usuarios_url}}"], "path": ["internal","v1","usuarios","{{usuario_id}}"] }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 · ms-canchas",
+      "item": [
+        {
+          "name": "Canchas",
+          "item": [
+            {
+              "name": "Listar canchas activas",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": {
+                  "raw": "{{canchas_url}}/api/v1/canchas?soloActivas=true",
+                  "host": ["{{canchas_url}}"],
+                  "path": ["api","v1","canchas"],
+                  "query": [{ "key": "soloActivas", "value": "true" }]
+                }
+              }
+            },
+            {
+              "name": "Listar todas las canchas (ADMIN)",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": {
+                  "raw": "{{canchas_url}}/api/v1/canchas?soloActivas=false",
+                  "host": ["{{canchas_url}}"],
+                  "path": ["api","v1","canchas"],
+                  "query": [{ "key": "soloActivas", "value": "false" }]
+                }
+              }
+            },
+            {
+              "name": "Crear cancha (ADMIN)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "url": { "raw": "{{canchas_url}}/api/v1/canchas", "host": ["{{canchas_url}}"], "path": ["api","v1","canchas"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Pádel 2\",\n  \"deporte\": \"PADEL\",\n  \"horaApertura\": \"07:00:00\",\n  \"horaCierre\": \"22:00:00\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "  const body = pm.response.json();",
+                      "  pm.collectionVariables.set('cancha_id', body.id);",
+                      "  console.log('Cancha ID guardado:', body.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Actualizar cancha (ADMIN)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "url": { "raw": "{{canchas_url}}/api/v1/canchas/{{cancha_id}}", "host": ["{{canchas_url}}"], "path": ["api","v1","canchas","{{cancha_id}}"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Pádel 2 (Actualizada)\",\n  \"deporte\": \"PADEL\",\n  \"horaApertura\": \"08:00:00\",\n  \"horaCierre\": \"21:00:00\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Cambiar estado de cancha (ADMIN)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "url": { "raw": "{{canchas_url}}/api/v1/canchas/{{cancha_id}}/estado", "host": ["{{canchas_url}}"], "path": ["api","v1","canchas","{{cancha_id}}","estado"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"activa\": false\n}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mantenimientos",
+          "item": [
+            {
+              "name": "Bloquear cancha por mantenimiento (ADMIN)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "url": { "raw": "{{canchas_url}}/api/v1/canchas/{{cancha_id}}/mantenimientos", "host": ["{{canchas_url}}"], "path": ["api","v1","canchas","{{cancha_id}}","mantenimientos"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"inicio\": \"2025-12-20T08:00:00-05:00\",\n  \"fin\": \"2025-12-20T12:00:00-05:00\",\n  \"motivo\": \"Mantenimiento preventivo de la red\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Listar mantenimientos de una cancha",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{canchas_url}}/api/v1/canchas/{{cancha_id}}/mantenimientos", "host": ["{{canchas_url}}"], "path": ["api","v1","canchas","{{cancha_id}}","mantenimientos"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Internal (inter-servicios)",
+          "item": [
+            {
+              "name": "Detalle interno de cancha [internal]",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "X-Service-Key", "value": "{{service_key}}" }],
+                "url": {
+                  "raw": "{{canchas_url}}/internal/v1/canchas/{{cancha_id}}?inicio=2025-12-20T09:00:00-05:00&fin=2025-12-20T10:00:00-05:00",
+                  "host": ["{{canchas_url}}"],
+                  "path": ["internal","v1","canchas","{{cancha_id}}"],
+                  "query": [
+                    { "key": "inicio", "value": "2025-12-20T09:00:00-05:00" },
+                    { "key": "fin",    "value": "2025-12-20T10:00:00-05:00" }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar todas las canchas [internal]",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "X-Service-Key", "value": "{{service_key}}" }],
+                "url": { "raw": "{{canchas_url}}/internal/v1/canchas", "host": ["{{canchas_url}}"], "path": ["internal","v1","canchas"] }
+              }
+            },
+            {
+              "name": "Bloqueos de cancha en rango [internal]",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "X-Service-Key", "value": "{{service_key}}" }],
+                "url": {
+                  "raw": "{{canchas_url}}/internal/v1/canchas/{{cancha_id}}/bloqueos?inicio=2025-12-20T00:00:00-05:00&fin=2025-12-21T00:00:00-05:00",
+                  "host": ["{{canchas_url}}"],
+                  "path": ["internal","v1","canchas","{{cancha_id}}","bloqueos"],
+                  "query": [
+                    { "key": "inicio", "value": "2025-12-20T00:00:00-05:00" },
+                    { "key": "fin",    "value": "2025-12-21T00:00:00-05:00" }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 · ms-reservas",
+      "item": [
+        {
+          "name": "Disponibilidad",
+          "item": [
+            {
+              "name": "Consultar disponibilidad de cancha",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": {
+                  "raw": "{{reservas_url}}/api/v1/disponibilidad?canchaId={{cancha_id}}&fecha=2025-12-20",
+                  "host": ["{{reservas_url}}"],
+                  "path": ["api","v1","disponibilidad"],
+                  "query": [
+                    { "key": "canchaId", "value": "{{cancha_id}}" },
+                    { "key": "fecha",    "value": "2025-12-20" }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reservas",
+          "item": [
+            {
+              "name": "Crear reserva",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "url": { "raw": "{{reservas_url}}/api/v1/reservas", "host": ["{{reservas_url}}"], "path": ["api","v1","reservas"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"canchaId\": \"{{cancha_id}}\",\n  \"inicio\": \"2025-12-20T09:00:00-05:00\"\n}"
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "  const body = pm.response.json();",
+                      "  pm.collectionVariables.set('reserva_id', body.id);",
+                      "  console.log('Reserva ID guardado:', body.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Mis reservas",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{reservas_url}}/api/v1/reservas/mias", "host": ["{{reservas_url}}"], "path": ["api","v1","reservas","mias"] }
+              }
+            },
+            {
+              "name": "Todas las reservas (ADMIN)",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{reservas_url}}/api/v1/reservas", "host": ["{{reservas_url}}"], "path": ["api","v1","reservas"] }
+              }
+            },
+            {
+              "name": "Cancelar reserva",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "url": { "raw": "{{reservas_url}}/api/v1/reservas/{{reserva_id}}/cancelacion", "host": ["{{reservas_url}}"], "path": ["api","v1","reservas","{{reserva_id}}","cancelacion"] },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"motivo\": \"No podré asistir\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Cancelar reserva sin motivo",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{reservas_url}}/api/v1/reservas/{{reserva_id}}/cancelacion", "host": ["{{reservas_url}}"], "path": ["api","v1","reservas","{{reserva_id}}","cancelacion"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Internal (inter-servicios)",
+          "item": [
+            {
+              "name": "Resumen de reservas [internal]",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "X-Service-Key", "value": "{{service_key}}" }],
+                "url": {
+                  "raw": "{{reservas_url}}/internal/v1/reservas/resumen?desde=2025-12-01T00:00:00-05:00&hasta=2025-12-31T23:59:59-05:00",
+                  "host": ["{{reservas_url}}"],
+                  "path": ["internal","v1","reservas","resumen"],
+                  "query": [
+                    { "key": "desde", "value": "2025-12-01T00:00:00-05:00" },
+                    { "key": "hasta", "value": "2025-12-31T23:59:59-05:00" }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 · ms-reportes",
+      "item": [
+        {
+          "name": "Reporte de ocupación (ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{reportes_url}}/api/v1/reportes/ocupacion?desde=2025-12-01&hasta=2025-12-31",
+              "host": ["{{reportes_url}}"],
+              "path": ["api","v1","reportes","ocupacion"],
+              "query": [
+                { "key": "desde", "value": "2025-12-01" },
+                { "key": "hasta", "value": "2025-12-31" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 · Swagger UI",
+      "item": [
+        {
+          "name": "Swagger ms-usuarios",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{usuarios_url}}/swagger-ui.html", "host": ["{{usuarios_url}}"], "path": ["swagger-ui.html"] }
+          }
+        },
+        {
+          "name": "Swagger ms-canchas",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{canchas_url}}/swagger-ui.html", "host": ["{{canchas_url}}"], "path": ["swagger-ui.html"] }
+          }
+        },
+        {
+          "name": "Swagger ms-reservas",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{reservas_url}}/swagger-ui.html", "host": ["{{reservas_url}}"], "path": ["swagger-ui.html"] }
+          }
+        },
+        {
+          "name": "Swagger ms-reportes",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{reportes_url}}/swagger-ui.html", "host": ["{{reportes_url}}"], "path": ["swagger-ui.html"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 · Flujo completo (happy path)",
+      "item": [
+        {
+          "name": "1. Login admin → guarda token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{usuarios_url}}/api/v1/auth/login", "host": ["{{usuarios_url}}"], "path": ["api","v1","auth","login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@canchas.local\",\n  \"password\": \"Admin1234!\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('token', body.accessToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Listar canchas → copia un ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{canchas_url}}/api/v1/canchas", "host": ["{{canchas_url}}"], "path": ["api","v1","canchas"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "if (body.length > 0) {",
+                  "  pm.collectionVariables.set('cancha_id', body[0].id);",
+                  "  console.log('Cancha ID:', body[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Registrar usuario nuevo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{usuarios_url}}/api/v1/auth/registro", "host": ["{{usuarios_url}}"], "path": ["api","v1","auth","registro"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"María García\",\n  \"email\": \"maria@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "4. Login usuario → guarda token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{usuarios_url}}/api/v1/auth/login", "host": ["{{usuarios_url}}"], "path": ["api","v1","auth","login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"maria@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('token', body.accessToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "5. Consultar disponibilidad",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{reservas_url}}/api/v1/disponibilidad?canchaId={{cancha_id}}&fecha=2025-12-20",
+              "host": ["{{reservas_url}}"],
+              "path": ["api","v1","disponibilidad"],
+              "query": [
+                { "key": "canchaId", "value": "{{cancha_id}}" },
+                { "key": "fecha",    "value": "2025-12-20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "6. Crear reserva → guarda ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{reservas_url}}/api/v1/reservas", "host": ["{{reservas_url}}"], "path": ["api","v1","reservas"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"canchaId\": \"{{cancha_id}}\",\n  \"inicio\": \"2025-12-20T10:00:00-05:00\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('reserva_id', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "7. Ver mis reservas",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{reservas_url}}/api/v1/reservas/mias", "host": ["{{reservas_url}}"], "path": ["api","v1","reservas","mias"] }
+          }
+        },
+        {
+          "name": "8. Cancelar reserva",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{reservas_url}}/api/v1/reservas/{{reserva_id}}/cancelacion", "host": ["{{reservas_url}}"], "path": ["api","v1","reservas","{{reserva_id}}","cancelacion"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivo\": \"Cancelación de prueba\"\n}"
+            }
+          }
+        },
+        {
+          "name": "9. Login admin → reporte",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{usuarios_url}}/api/v1/auth/login", "host": ["{{usuarios_url}}"], "path": ["api","v1","auth","login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@canchas.local\",\n  \"password\": \"Admin1234!\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.collectionVariables.set('token', pm.response.json().accessToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10. Generar reporte de ocupación",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{reportes_url}}/api/v1/reportes/ocupacion?desde=2025-12-01&hasta=2025-12-31",
+              "host": ["{{reportes_url}}"],
+              "path": ["api","v1","reportes","ocupacion"],
+              "query": [
+                { "key": "desde", "value": "2025-12-01" },
+                { "key": "hasta", "value": "2025-12-31" }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

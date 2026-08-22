@@ -1,0 +1,50 @@
+<div class="reservas-page">
+  <header class="reservas-header">
+    <div>
+      <h1>Mis reservas ({{ confirmedReservationsCount() }})</h1>
+      <p>Este es el listado de tus reservas.</p>
+    </div>
+    <a routerLink="/clientes" class="new-reservation-link">+ Nueva reserva</a>
+  </header>
+
+  @if (cancelError()) {
+    <p class="reservas-status reservas-status--error">{{ cancelError() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="reservas-status">Cargando tus reservas...</p>
+  } @else if (reservations().length === 0) {
+    <div class="reservas-empty">
+      <span class="reservas-empty__emoji">🗓️</span>
+      <p>Todavía no tienes reservas.</p>
+      <a routerLink="/clientes" class="new-reservation-link">Crear tu primera reserva</a>
+    </div>
+  } @else {
+    <div class="reservas-grid">
+      @for (reservation of reservations(); track reservation.id) {
+        <article class="reserva-card">
+          <div class="reserva-card__top">
+            <span class="reserva-card__emoji">{{ reservation.canchaEmoji }}</span>
+            <span class="reserva-card__estado" [class.reserva-card__estado--cancelada]="reservation.estado !== 'Confirmada'">
+              {{ reservation.estado }}
+            </span>
+          </div>
+          <h2>{{ reservation.canchaNombre }}</h2>
+          <p class="reserva-card__fecha">{{ formatFecha(reservation.fecha) }}</p>
+          <p class="reserva-card__hora">{{ reservation.hora }} hrs</p>
+
+          @if (isCancelable(reservation)) {
+            <button
+              type="button"
+              class="reserva-card__cancel"
+              [disabled]="isCanceling(reservation.id)"
+              (click)="cancelar(reservation.id)"
+            >
+              {{ isCanceling(reservation.id) ? 'Cancelando...' : 'Cancelar reserva' }}
+            </button>
+          }
+        </article>
+      }
+    </div>
+  }
+</div>

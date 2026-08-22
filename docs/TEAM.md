@@ -1,13 +1,13 @@
-# Organización inicial del equipo
+# Organización del equipo
 
 La distribución busca mantener dos personas en frontend y dos en backend, con responsabilidades primarias claras y revisión cruzada.
 
 | Rol | Responsabilidad primaria | Responsabilidad secundaria | Integrante |
 | --- | --- | --- | --- |
-| Frontend 1 | `shell` y autenticación en la interfaz | `mf-reservas` | Por asignar |
-| Frontend 2 | `mf-administracion` | `mf-reportes` | Por asignar |
-| Backend 1 | `ms-usuarios` | `ms-canchas` | Por asignar |
-| Backend 2 | `ms-reservas` | `ms-reportes` | Por asignar |
+| Frontend 1 | `shell` y autenticación en la interfaz | `mf-clientes` | Enzo Aliatis |
+| Frontend 2 | `mf-administracion` | `mf-reportes` | Jordan Murillo |
+| Backend 1 | `ms-usuarios` | `ms-canchas` | Galo Suarez |
+| Backend 2 | `ms-reservas` | `ms-reportes` | Mauro Cadme |
 
 ## Acuerdos de colaboración
 
@@ -19,7 +19,7 @@ La distribución busca mantener dos personas en frontend y dos en backend, con r
 
 ## Parejas de integración sugeridas
 
-- Reservas: Frontend 1 + Backend 2.
-- Administración de canchas y usuarios: Frontend 2 + Backend 1.
-- Reportes: Frontend 2 + Backend 2.
-- Autenticación y autorización: Frontend 1 + Backend 1.
+- Reservas: Enzo Aliatis + Mauro Cadme.
+- Administración de canchas y usuarios: Jordan Murillo + Galo Suarez.
+- Reportes: Jordan Murillo + Mauro Cadme.
+- Autenticación y autorización: Enzo Aliatis + Galo Suarez.

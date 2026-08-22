@@ -1,0 +1,10 @@
+{
+  "name": "frontend",
+  "private": true,
+  "scripts": {
+    "clientes": "pnpm --filter mf-clientes start",
+    "administracion": "pnpm --filter mf-administracion start",
+    "reportes": "pnpm --filter mf-reportes start",
+    "shell": "pnpm --filter shell start"
+  }
+}

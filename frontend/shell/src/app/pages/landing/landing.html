@@ -1,0 +1,58 @@
+<div class="page">
+  <header class="topbar">
+    <div class="topbar__inner">
+      <span class="brand">🏟️ CanchasYA</span>
+      <nav class="topbar__actions">
+        <a routerLink="/login" class="btn btn-outline">Iniciar sesión</a>
+        <a routerLink="/registro" class="btn btn-primary">Registrarme</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero__content">
+      <span class="hero__eyebrow">Pádel · Tenis · Básquet</span>
+      <h1>Reserva tu cancha en segundos</h1>
+      <p>
+        Consulta disponibilidad en tiempo real, reserva el horario que quieras y lleva el control de tus
+        partidos desde un solo lugar.
+      </p>
+      <div class="hero__actions">
+        <a routerLink="/registro" class="btn btn-primary">Crear cuenta gratis</a>
+        <a routerLink="/login" class="btn btn-outline">Ya tengo cuenta</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="sports">
+    <h2>Elige tu deporte</h2>
+    <div class="sports__grid">
+      @for (sport of sports; track sport.name) {
+        <article class="sport-card">
+          <span class="sport-card__emoji">{{ sport.emoji }}</span>
+          <h3>{{ sport.name }}</h3>
+          <p>{{ sport.description }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="steps">
+    <h2>¿Cómo funciona?</h2>
+    <ol class="steps__list">
+      @for (step of steps; track step.title; let i = $index) {
+        <li class="step">
+          <span class="step__number">{{ i + 1 }}</span>
+          <div>
+            <h3>{{ step.title }}</h3>
+            <p>{{ step.description }}</p>
+          </div>
+        </li>
+      }
+    </ol>
+  </section>
+
+  <footer class="footer">
+    <p>CanchasYA · Sistema de reserva de canchas deportivas</p>
+  </footer>
+</div>

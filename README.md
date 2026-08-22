@@ -1,6 +1,6 @@
 # Sistema de Reserva de Canchas Deportivas
 
-Monorepo del proyecto integrador de la asignatura **Desarrollo de Aplicaciones Empresariales**. El sistema permitirá reservar canchas de pádel, tenis y básquet mediante una arquitectura de microfrontends, microservicios y PostgreSQL.
+Monorepo del proyecto integrador de la asignatura **Desarrollo de Aplicaciones Empresariales**. El sistema permite reservar canchas de pádel, tenis y básquet mediante una arquitectura de microfrontends, microservicios y PostgreSQL.
 
 ## Alcance inicial
 
@@ -11,12 +11,12 @@ Monorepo del proyecto integrador de la asignatura **Desarrollo de Aplicaciones E
 
 El documento fuente está versionado en [docs/requirements/Alcance_Funcional_Reserva_Canchas_v2.pdf](docs/requirements/Alcance_Funcional_Reserva_Canchas_v2.pdf).
 
-## Arquitectura prevista
+## Arquitectura implementada
 
 | Área | Componente | Responsabilidad |
 | --- | --- | --- |
 | Frontend | `shell` | Layout, navegación, autenticación y orquestación de remotes |
-| Frontend | `mf-reservas` | Disponibilidad, creación, historial y cancelación de reservas |
+| Frontend | `mf-clientes` | Disponibilidad, creación, historial y cancelación de reservas |
 | Frontend | `mf-administracion` | Gestión de canchas, horarios, bloqueos, usuarios y reservas |
 | Frontend | `mf-reportes` | Indicadores básicos de ocupación y uso |
 | Backend | `ms-usuarios` | Registro, autenticación, usuarios y roles |
@@ -24,7 +24,9 @@ El documento fuente está versionado en [docs/requirements/Alcance_Funcional_Res
 | Backend | `ms-reservas` | Disponibilidad, creación, consulta, cancelación y reglas RN-01 a RN-08 |
 | Backend | `ms-reportes` | Agregación de datos para reportes básicos |
 
-Los microfrontends se integrarán mediante Module Federation. Los servicios expondrán API REST documentadas con OpenAPI y serán responsables de sus propios datos en PostgreSQL.
+Los microfrontends se integran mediante Module Federation. Los servicios exponen API REST documentadas con OpenAPI y son responsables de sus propios datos en PostgreSQL.
+
+El sistema completo ha sido levantado y probado funcionalmente con Docker Compose. Permanecen pendientes las pruebas automatizadas end-to-end.
 
 ## Estructura
 
@@ -40,7 +42,7 @@ Los microfrontends se integrarán mediante Module Federation. Los servicios expo
 
 ## Organización del equipo
 
-La propuesta inicial para cuatro integrantes se encuentra en [docs/TEAM.md](docs/TEAM.md). Cada frente tiene dos responsables, pero los contratos OpenAPI y los flujos de extremo a extremo se revisan entre frontend y backend.
+La distribución del equipo se encuentra en [docs/TEAM.md](docs/TEAM.md). Cada frente tiene dos responsables, pero los contratos OpenAPI y los flujos de extremo a extremo se revisan entre frontend y backend.
 
 ## Hoja de ruta
 
@@ -52,20 +54,29 @@ Aún no hay una composición local lista: la configuración de Docker Compose pa
 
 ## Flujo de trabajo
 
-1. Crear una rama desde `develop`: `feat/<componente>-<descripcion>`.
+1. Crear una rama desde `integracion-completa-sistema`: `feat/<componente>-<descripcion>`.
 2. Hacer commits pequeños siguiendo Conventional Commits.
-3. Abrir un pull request hacia `develop` y solicitar al menos una revisión.
-4. Integrar `develop` en `main` únicamente para versiones estables o entregas.
+3. Abrir un pull request hacia `integracion-completa-sistema` y solicitar al menos una revisión.
+4. Integrar `integracion-completa-sistema` en `main` únicamente para versiones estables o entregas.
 
 Las reglas completas están en [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Primeras decisiones pendientes
+## Decisiones técnicas vigentes
 
-- Framework y versión del frontend, manteniendo Module Federation.
-- Versiones de Java, Spring Boot y herramienta de construcción.
-- Estrategia de autenticación básica con roles.
-- Uso opcional de API Gateway o BFF.
-- Contratos OpenAPI y modelo de datos por microservicio.
-- Convención de puertos y variables de entorno para Docker Compose.
+- Frontend con Angular 20, componentes standalone, pnpm y Module Federation sobre Webpack 5.
+- Backend con Java 17, Spring Boot y Maven multi-módulo.
+- Cuatro microservicios, cada uno propietario de su base PostgreSQL.
+- Autenticación JWT con roles `USUARIO` y `ADMINISTRADOR`.
+- Comunicación interna REST protegida mediante `X-Service-Key`.
+- Sin API Gateway o BFF; los microfrontends consumen directamente las API públicas de los servicios.
+- Ejecución local integrada mediante Docker Compose.
 
-No se deben subir credenciales ni archivos `.env` al repositorio.
+La arquitectura detallada está en [docs/architecture/README.md](docs/architecture/README.md) y las instrucciones de ejecución en [infra/README.md](infra/README.md).
+
+## Trabajo pendiente
+
+- Pruebas automatizadas end-to-end de los flujos principales.
+- Consolidación posterior de contratos OpenAPI y evidencias de pruebas.
+- Preparación de los entregables académicos finales en los formatos solicitados.
+
+Las credenciales incluidas son exclusivamente para demostración local. No se deben subir credenciales reales ni archivos `.env` al repositorio.

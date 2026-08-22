@@ -1,0 +1,41 @@
+<div class="usuarios-page">
+  <header class="usuarios-header">
+    <h1>Gestión de usuarios</h1>
+    <p>Activa o inactiva el acceso de clientes y administradores al sistema.</p>
+  </header>
+
+  @if (loading()) {
+    <p class="usuarios-status">Cargando usuarios...</p>
+  } @else {
+    <div class="usuarios-table">
+      <div class="usuarios-table__head">
+        <span>Nombre</span>
+        <span>Correo</span>
+        <span>Rol</span>
+        <span>Estado</span>
+        <span></span>
+      </div>
+
+      @for (usuario of usuarios(); track usuario.id) {
+        <div class="usuarios-table__row">
+          <span class="usuarios-table__nombre">{{ usuario.nombre }}</span>
+          <span class="usuarios-table__email">{{ usuario.email }}</span>
+          <span class="badge" [class.badge--admin]="usuario.rol === 'admin'">
+            {{ usuario.rol === 'admin' ? 'Administrador' : 'Cliente' }}
+          </span>
+          <span class="badge" [class.badge--inactiva]="!usuario.activo">
+            {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+          </span>
+          <button
+            type="button"
+            class="btn-ghost"
+            [disabled]="isSaving(usuario.id)"
+            (click)="cambiarEstado(usuario)"
+          >
+            {{ usuario.activo ? 'Inactivar' : 'Activar' }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>
