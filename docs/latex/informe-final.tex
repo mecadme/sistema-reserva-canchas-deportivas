@@ -16,6 +16,7 @@
 \setlength{\parskip}{0.7em}
 \setlength{\parindent}{0pt}
 \hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\renewcommand{\contentsname}{Indice general}
 
 \lstdefinestyle{code}{
   basicstyle=\ttfamily\small,
@@ -35,6 +36,7 @@
 
 \begin{document}
 
+\pagenumbering{gobble}
 \begin{titlepage}
   \centering
   {\Large Universidad Politecnica Salesiana\par}
@@ -55,8 +57,10 @@
   {\large Agosto 2026\par}
 \end{titlepage}
 
+\pagenumbering{roman}
 \tableofcontents
 \newpage
+\pagenumbering{arabic}
 
 \section{Resumen ejecutivo}
 
@@ -105,6 +109,19 @@ El sistema cubre los siguientes procesos principales:
 
 Quedan fuera de alcance pagos, notificaciones automaticas, reservas recurrentes, torneos, aplicacion movil nativa y reportes avanzados de inteligencia de negocio.
 
+\subsection{Detalle de funcionalidades clave}
+
+\begin{longtable}{p{4cm}p{10cm}}
+\textbf{Funcionalidad} & \textbf{Cumplimiento en el sistema} \\
+\hline
+Consulta de disponibilidad & Permite a usuarios autenticados seleccionar cancha y fecha para visualizar bloques horarios disponibles y ocupados dentro del horario de atencion configurado. \\
+Reserva de cancha & Permite al usuario final seleccionar deporte, cancha, fecha y bloque horario disponible. Antes de confirmar, el sistema valida disponibilidad y evita solapamientos. \\
+Cancelacion de reserva & El usuario final puede cancelar reservas propias no iniciadas. El administrador puede cancelar cualquier reserva del sistema desde el modulo administrativo. \\
+Gestion de canchas & El administrador puede crear, editar e inactivar canchas, definiendo nombre, deporte, horario de atencion y estado operativo. \\
+Gestion de horarios y bloqueos & El administrador puede registrar bloqueos de mantenimiento que impiden nuevas reservas durante el intervalo configurado. \\
+Reportes basicos & El administrador puede consultar indicadores de ocupacion, reservas por periodo, cancelaciones y demanda por cancha o deporte. \\
+\end{longtable}
+
 \section{Roles, permisos y modulos}
 
 \subsection{Roles}
@@ -134,16 +151,18 @@ Reportes & \texttt{mf-reportes} & Consulta de indicadores basicos para administr
 
 Las reglas de negocio implementadas se concentran en el proceso de reserva y en la administracion de canchas:
 
-\begin{itemize}
-  \item Una reserva debe asociarse a un usuario autenticado y a una cancha existente.
-  \item No se permite crear reservas sobre horarios ocupados.
-  \item La hora de inicio debe pertenecer al horario de atencion de la cancha.
-  \item No se permite reservar una cancha inactiva.
-  \item Los bloqueos de mantenimiento impiden crear reservas en el periodo bloqueado.
-  \item Existe un limite configurable de reservas activas simultaneas por usuario.
-  \item Solo el administrador puede crear, editar o inactivar canchas.
-  \item Toda reserva mantiene un estado: \texttt{CONFIRMADA}, \texttt{CANCELADA} o \texttt{FINALIZADA}.
-\end{itemize}
+\begin{longtable}{p{1.7cm}p{12.3cm}}
+\textbf{RN} & \textbf{Descripcion y cumplimiento} \\
+\hline
+RN-01 & Una reserva se realiza sobre una cancha especifica de padel, tenis o basquet, en una fecha y bloque horario definido. \\
+RN-02 & No se permite crear una reserva sobre un bloque ocupado para la misma cancha. La validacion se aplica en backend y se refuerza en PostgreSQL. \\
+RN-03 & El usuario final solo puede cancelar sus reservas propias; el administrador puede cancelar cualquier reserva. \\
+RN-04 & Una reserva solo puede cancelarse si su hora de inicio aun no ha ocurrido. \\
+RN-05 & Una reserva cancelada libera el bloque horario para nuevas reservas. \\
+RN-06 & El sistema contempla un limite configurable de reservas activas simultaneas por usuario. \\
+RN-07 & Solo el administrador puede crear, editar o inactivar canchas y definir su horario de atencion. \\
+RN-08 & Toda reserva mantiene trazabilidad mediante los estados \texttt{CONFIRMADA}, \texttt{CANCELADA} o \texttt{FINALIZADA}. \\
+\end{longtable}
 
 La regla de no solapamiento se refuerza en PostgreSQL mediante un constraint \texttt{EXCLUDE USING gist} sobre la tabla \texttt{reservas}. Esto evita condiciones de carrera que una validacion solamente en Java no podria prevenir de forma completa.
 
@@ -293,6 +312,47 @@ E4 & Scripts DDL y seed de PostgreSQL. & Implementado. \\
 E5 & Manual breve de despliegue local. & En preparacion en LaTeX. \\
 E6 & Presentacion final y demostracion en vivo. & Pendiente. \\
 \end{longtable}
+
+\section{Rubrica de evaluacion}
+
+La siguiente tabla resume los criterios del alcance y el peso usado para evaluar el proyecto integrador:
+
+\begin{longtable}{p{4.2cm}p{7.5cm}p{2cm}}
+\textbf{Criterio} & \textbf{Descripcion} & \textbf{Peso} \\
+\hline
+Alcance funcional implementado & Disponibilidad, creacion y cancelacion de reservas operativas para usuario final y administrador. & 25\% \\
+Arquitectura de microfrontends & Implementacion de Module Federation con shell host y remotes integrados, desplegables de forma independiente. & 15\% \\
+Arquitectura de microservicios & Microservicios Spring Boot independientes, con responsabilidades delimitadas y API REST documentada. & 15\% \\
+Modelo de datos y persistencia & Modelo PostgreSQL con independencia de datos entre microservicios. & 15\% \\
+Reglas de negocio y validaciones & Aplicacion de RN-01 a RN-08, especialmente la validacion de solapamiento. & 10\% \\
+Modulo de reportes basicos & Reportes de ocupacion, reservas por periodo y cancelaciones con datos consistentes. & 10\% \\
+Calidad tecnica y documentacion & Buenas practicas, manual de despliegue y claridad en arquitectura y funcionamiento. & 10\% \\
+\textbf{Total} & & \textbf{100\%} \\
+\end{longtable}
+
+\subsection{Niveles de logro}
+
+\begin{longtable}{p{3cm}p{2.5cm}p{8.5cm}}
+\textbf{Nivel} & \textbf{Puntaje} & \textbf{Descripcion general} \\
+\hline
+Excelente & 90--100 & Cumple la totalidad de los criterios con alta calidad tecnica, reglas de negocio correctas y documentacion completa. \\
+Bueno & 75--89 & Cumple la mayoria de los criterios, con observaciones menores en arquitectura, reglas o documentacion. \\
+Suficiente & 60--74 & Cumple el alcance funcional minimo, pero presenta debilidades relevantes en arquitectura, datos o reglas de negocio. \\
+Insuficiente & Menor a 60 & No cumple el alcance funcional minimo o no aplica microfrontends con Module Federation y/o microservicios Spring Boot. \\
+\end{longtable}
+
+\section{Criterios de aceptacion del alcance}
+
+El informe evidencia el cumplimiento del alcance cuando se satisfacen los siguientes criterios:
+
+\begin{enumerate}
+  \item El usuario final puede consultar disponibilidad, crear y cancelar una reserva de canchas de padel, tenis o basquet.
+  \item El administrador puede gestionar el catalogo de canchas y cancelar cualquier reserva del sistema.
+  \item El sistema impide crear reservas sobre bloques horarios ya ocupados.
+  \item El modulo de reportes basicos muestra al menos ocupacion por cancha y numero de reservas por periodo.
+  \item El frontend esta compuesto por un shell y microfrontends remotos integrados mediante Module Federation.
+  \item El backend esta compuesto por microservicios Spring Boot independientes con persistencia PostgreSQL.
+\end{enumerate}
 
 \section{Estado actual y pendientes}
 
