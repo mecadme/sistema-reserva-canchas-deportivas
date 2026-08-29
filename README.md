@@ -50,7 +50,14 @@ Las fases previstas, desde los acuerdos técnicos iniciales hasta la entrega fin
 
 ## Cómo levantar el proyecto
 
-Aún no hay una composición local lista: la configuración de Docker Compose para levantar PostgreSQL, los microservicios y el `shell` con sus microfrontends está pendiente. El detalle de lo que incluirá está en [infra/README.md](infra/README.md).
+El sistema completo (4 bases PostgreSQL + 4 microservicios + shell + 3 microfrontends) se levanta con un solo comando usando Docker Compose:
+
+```bash
+cp infra/.env.example infra/.env
+docker compose -f infra/docker-compose.yml up --build
+```
+
+La aplicación queda disponible en http://localhost:4300. Detalles de puertos, URLs de Swagger, credenciales de demostración y el modo de desarrollo sin Docker están en [infra/README.md](infra/README.md).
 
 ## Flujo de trabajo
 
