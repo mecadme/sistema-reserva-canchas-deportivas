@@ -1,0 +1,412 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+
+\geometry{margin=2.5cm}
+\setlength{\parskip}{0.7em}
+\setlength{\parindent}{0pt}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\renewcommand{\contentsname}{Indice general}
+
+\lstdefinestyle{code}{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!8}
+}
+
+\newcommand{\evidenceimage}[3]{
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{figures/#1}
+    \caption{#2}
+    \label{#3}
+  \end{figure}
+}
+
+\begin{document}
+
+\pagenumbering{gobble}
+\begin{titlepage}
+  \centering
+  {\Large Universidad Politecnica Salesiana\par}
+  {\large Maestria en Ingenieria de Software\par}
+  {\large Desarrollo de Aplicaciones Empresariales\par}
+  \vfill
+  {\Huge\bfseries Sistema de Reserva de Canchas Deportivas\par}
+  \vspace{0.5cm}
+  {\Large Informe academico final\par}
+  \vfill
+  \begin{tabular}{ll}
+    Frontend 1: & Enzo Aliatis \\
+    Frontend 2: & Jordan Murillo \\
+    Backend 1: & Galo Suarez \\
+    Backend 2: & Mauro Cadme \\
+  \end{tabular}
+  \vfill
+  {\large Agosto 2026\par}
+\end{titlepage}
+
+\pagenumbering{roman}
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+
+\section{Resumen ejecutivo}
+
+El proyecto implementa un sistema web para reserva de canchas deportivas de padel, tenis y basquet. La solucion permite a usuarios finales registrarse, iniciar sesion, consultar disponibilidad, crear reservas, revisar su historial y cancelar reservas. Tambien permite a administradores gestionar canchas, usuarios, reservas globales, bloqueos de mantenimiento y reportes basicos de ocupacion.
+
+La arquitectura se construyo con microfrontends Angular integrados mediante Module Federation, microservicios Spring Boot y una base PostgreSQL independiente por servicio. El sistema completo puede levantarse localmente con Docker Compose y expone documentacion Swagger/OpenAPI en los cuatro microservicios. El cierre fue verificado mediante la compilacion de todos los componentes, seis pruebas unitarias de backend, cuatro pruebas unitarias de frontend, validacion de la configuracion integrada y evidencias funcionales de los flujos principales.
+
+\section{Introduccion}
+
+El proyecto corresponde al trabajo integrador de la asignatura Desarrollo de Aplicaciones Empresariales. Su proposito es aplicar conceptos de arquitectura empresarial moderna mediante una solucion acotada, verificable y desplegable localmente. El dominio elegido, reserva de canchas deportivas, permite trabajar reglas de negocio relevantes como disponibilidad, no solapamiento de horarios, roles diferenciados, estados de reserva y reportes operativos.
+
+El alcance tecnico prioriza independencia entre componentes. En frontend se separan responsabilidades en un shell y tres remotes. En backend se dividen dominios en cuatro microservicios. En datos se mantiene la propiedad por servicio, evitando claves foraneas y consultas cruzadas entre bases de microservicios distintos.
+
+\section{Objetivos}
+
+\subsection{Objetivo general}
+
+Desarrollar un sistema web de reserva de canchas deportivas que permita a usuarios finales y administradores operar los flujos principales del dominio, utilizando microfrontends con Module Federation, microservicios Spring Boot y persistencia PostgreSQL.
+
+\subsection{Objetivos especificos}
+
+\begin{itemize}
+  \item Implementar un shell Angular que orqueste microfrontends remotos.
+  \item Construir microservicios independientes para usuarios, canchas, reservas y reportes.
+  \item Modelar una base PostgreSQL independiente por microservicio.
+  \item Implementar autenticacion JWT y control de acceso por roles.
+  \item Aplicar reglas de negocio de reserva, disponibilidad y cancelacion.
+  \item Proveer despliegue local reproducible mediante Docker Compose.
+  \item Documentar arquitectura, modelo de datos, APIs, pruebas y resultados del cierre.
+\end{itemize}
+
+\section{Alcance funcional}
+
+El sistema cubre los siguientes procesos principales:
+
+\begin{itemize}
+  \item Registro e inicio de sesion de usuarios.
+  \item Consulta de canchas activas y horarios disponibles.
+  \item Creacion de reservas por parte de usuarios finales.
+  \item Consulta y cancelacion de reservas propias.
+  \item Gestion administrativa de canchas, horarios, estados y bloqueos.
+  \item Gestion administrativa de usuarios.
+  \item Consulta administrativa de reservas globales.
+  \item Reportes basicos de ocupacion, demanda y cancelaciones.
+\end{itemize}
+
+Se mantienen fuera de alcance pagos, notificaciones automaticas, reservas recurrentes, torneos, aplicacion movil nativa y reportes avanzados de inteligencia de negocio.
+
+\subsection{Detalle de funcionalidades clave}
+
+\begin{longtable}{p{4cm}p{10cm}}
+\textbf{Funcionalidad} & \textbf{Cumplimiento en el sistema} \\
+\hline
+Consulta de disponibilidad & Permite a usuarios autenticados seleccionar cancha y fecha para visualizar bloques horarios disponibles y ocupados dentro del horario de atencion configurado. \\
+Reserva de cancha & Permite al usuario final seleccionar deporte, cancha, fecha y bloque horario disponible. Antes de confirmar, el sistema valida disponibilidad y evita solapamientos. \\
+Cancelacion de reserva & El usuario final puede cancelar reservas propias no iniciadas. El administrador puede cancelar cualquier reserva del sistema desde el modulo administrativo. \\
+Gestion de canchas & El administrador puede crear, editar e inactivar canchas, definiendo nombre, deporte, horario de atencion y estado operativo. \\
+Gestion de horarios y bloqueos & El administrador puede registrar bloqueos de mantenimiento que impiden nuevas reservas durante el intervalo configurado. \\
+Reportes basicos & El administrador puede consultar indicadores de ocupacion, reservas por periodo, cancelaciones y demanda por cancha o deporte. \\
+\end{longtable}
+
+\section{Roles, permisos y modulos}
+
+\subsection{Roles}
+
+\begin{longtable}{p{3.5cm}p{10cm}}
+\textbf{Rol} & \textbf{Permisos principales} \\
+\hline
+Usuario final & Registrarse, iniciar sesion, consultar disponibilidad, crear reservas, consultar sus reservas y cancelar reservas propias antes del inicio. \\
+Administrador & Gestionar canchas, bloqueos, usuarios, reservas globales y reportes. Puede cancelar cualquier reserva del sistema. \\
+\end{longtable}
+
+\subsection{Modulos funcionales}
+
+\begin{longtable}{p{4cm}p{4cm}p{6cm}}
+\textbf{Modulo} & \textbf{Componente} & \textbf{Responsabilidad} \\
+\hline
+Shell & \texttt{frontend/shell} & Layout, autenticacion, navegacion, guards y carga de remotes. \\
+Cliente & \texttt{mf-clientes} & Disponibilidad, reserva y consulta de reservas propias. \\
+Administracion & \texttt{mf-administracion} & Canchas, usuarios y reservas administrativas. \\
+Reportes & \texttt{mf-reportes} & Consulta de indicadores basicos para administradores. \\
+\end{longtable}
+
+\evidenceimage{01-landing.png}{Pantalla inicial del shell del sistema.}{fig:landing}
+\evidenceimage{02-login.png}{Pantalla de inicio de sesion.}{fig:login}
+
+\section{Reglas de negocio}
+
+Las reglas de negocio implementadas se concentran en el proceso de reserva y en la administracion de canchas:
+
+\begin{longtable}{p{1.7cm}p{12.3cm}}
+\textbf{RN} & \textbf{Descripcion y cumplimiento} \\
+\hline
+RN-01 & Una reserva se realiza sobre una cancha especifica de padel, tenis o basquet, en una fecha y bloque horario definido. \\
+RN-02 & No se permite crear una reserva sobre un bloque ocupado para la misma cancha. La validacion se aplica en backend y se refuerza en PostgreSQL. \\
+RN-03 & El usuario final solo puede cancelar sus reservas propias; el administrador puede cancelar cualquier reserva. \\
+RN-04 & Una reserva solo puede cancelarse si su hora de inicio aun no ha ocurrido. \\
+RN-05 & Una reserva cancelada libera el bloque horario para nuevas reservas. \\
+RN-06 & El sistema contempla un limite configurable de reservas activas simultaneas por usuario. \\
+RN-07 & Solo el administrador puede crear, editar o inactivar canchas y definir su horario de atencion. \\
+RN-08 & Toda reserva mantiene trazabilidad mediante los estados \texttt{CONFIRMADA}, \texttt{CANCELADA} o \texttt{FINALIZADA}. \\
+\end{longtable}
+
+La regla de no solapamiento se refuerza en PostgreSQL mediante un constraint \texttt{EXCLUDE USING gist} sobre la tabla \texttt{reservas}. Esto evita condiciones de carrera que una validacion solamente en Java no podria prevenir de forma completa.
+
+\section{Arquitectura implementada}
+
+La arquitectura implementada combina microfrontends, microservicios y bases de datos independientes. El navegador carga el shell en el puerto 4300; este shell integra remotes en los puertos 4201, 4202 y 4203. Los microfrontends consumen directamente las APIs publicas de los microservicios. No se utiliza API Gateway ni BFF.
+
+\evidenceimage{arquitectura-contenedores.png}{Vista de contenedores del sistema.}{fig:contenedores}
+
+\begin{longtable}{p{4cm}p{4cm}p{6cm}}
+\textbf{Capa} & \textbf{Tecnologia} & \textbf{Detalle} \\
+\hline
+Frontend & Angular 20, Module Federation & Shell y tres remotes. \\
+Backend & Java 17, Spring Boot, Maven & Cuatro microservicios independientes. \\
+Datos & PostgreSQL, Flyway & Una base de datos por servicio. \\
+Despliegue local & Docker Compose & Levanta frontend, backend y bases de datos. \\
+Documentacion API & Swagger/OpenAPI & Disponible en runtime por microservicio. \\
+\end{longtable}
+
+\section{Microfrontends}
+
+El frontend se estructura en cuatro aplicaciones Angular:
+
+\begin{itemize}
+  \item \texttt{shell}: host de Module Federation, responsable del layout, autenticacion, rutas protegidas y navegacion.
+  \item \texttt{mf-clientes}: remote de usuario final, enfocado en disponibilidad y reservas.
+  \item \texttt{mf-administracion}: remote administrativo para canchas, usuarios y reservas.
+  \item \texttt{mf-reportes}: remote administrativo para reportes.
+\end{itemize}
+
+Cada remote expone sus rutas mediante \texttt{./Routes}. El shell decide que remote cargar segun la ruta y el rol del usuario. Esta decision reduce acoplamiento entre modulos y permite construir y desplegar cada microfrontend de forma independiente.
+
+\evidenceimage{03-cliente-disponibilidad.png}{Modulo de cliente para disponibilidad y reserva.}{fig:cliente-disponibilidad}
+\evidenceimage{04-cliente-mis-reservas.png}{Modulo de cliente para consulta de reservas propias.}{fig:cliente-reservas}
+\evidenceimage{05-admin-canchas.png}{Modulo administrativo de canchas.}{fig:admin-canchas}
+\evidenceimage{06-admin-usuarios.png}{Modulo administrativo de usuarios.}{fig:admin-usuarios}
+\evidenceimage{07-admin-reservas.png}{Modulo administrativo de reservas.}{fig:admin-reservas}
+\evidenceimage{08-reportes.png}{Modulo administrativo de reportes.}{fig:reportes}
+
+\section{Microservicios}
+
+El backend esta compuesto por cuatro microservicios Spring Boot:
+
+\begin{longtable}{p{3.5cm}p{2cm}p{3cm}p{6cm}}
+\textbf{Servicio} & \textbf{Puerto} & \textbf{Base} & \textbf{Responsabilidad} \\
+\hline
+\texttt{ms-usuarios} & 8081 & \texttt{usuarios\_db} & Registro, login JWT, usuarios y roles. \\
+\texttt{ms-canchas} & 8082 & \texttt{canchas\_db} & Canchas, horarios, deportes y mantenimientos. \\
+\texttt{ms-reservas} & 8083 & \texttt{reservas\_db} & Disponibilidad, reserva, cancelacion y estados. \\
+\texttt{ms-reportes} & 8084 & \texttt{reportes\_db} & Reportes basicos y auditoria de consultas. \\
+\end{longtable}
+
+\subsection{Endpoints principales}
+
+\begin{longtable}{p{4cm}p{10cm}}
+\textbf{Servicio} & \textbf{Endpoints publicos principales} \\
+\hline
+\texttt{ms-usuarios} & \texttt{POST /api/v1/auth/registro}, \texttt{POST /api/v1/auth/login}, \texttt{GET /api/v1/usuarios/me}, \texttt{GET /api/v1/usuarios}, \texttt{PATCH /api/v1/usuarios/\{id\}/estado}. \\
+\texttt{ms-canchas} & \texttt{GET /api/v1/canchas}, \texttt{POST /api/v1/canchas}, \texttt{PUT /api/v1/canchas/\{id\}}, \texttt{PATCH /api/v1/canchas/\{id\}/estado}, \texttt{POST /api/v1/canchas/\{id\}/mantenimientos}. \\
+\texttt{ms-reservas} & \texttt{GET /api/v1/disponibilidad}, \texttt{POST /api/v1/reservas}, \texttt{GET /api/v1/reservas/mias}, \texttt{GET /api/v1/reservas}, \texttt{PATCH /api/v1/reservas/\{id\}/cancelacion}. \\
+\texttt{ms-reportes} & \texttt{GET /api/v1/reportes/ocupacion}. \\
+\end{longtable}
+
+\evidenceimage{endpoints.png}{Resumen visual de endpoints principales.}{fig:endpoints}
+
+\section{Modelo de datos}
+
+Cada microservicio posee su propia base PostgreSQL. No existen joins, claves foraneas ni consultas entre bases de microservicios distintos. Las relaciones externas se guardan como UUID, por ejemplo \texttt{usuario\_id} y \texttt{cancha\_id} en \texttt{reservas\_db}.
+
+\evidenceimage{modelo-datos.png}{Modelo de datos por servicio.}{fig:modelo-datos}
+
+\subsection{usuarios\_db}
+
+\begin{lstlisting}[style=code]
+usuarios(id, nombre, email, password_hash, rol, activo, creado_en, actualizado_en)
+\end{lstlisting}
+
+\subsection{canchas\_db}
+
+\begin{lstlisting}[style=code]
+canchas(id, nombre, deporte, hora_apertura, hora_cierre, activa, creado_en, actualizado_en)
+bloqueos_mantenimiento(id, cancha_id, inicio, fin, motivo, creado_en)
+\end{lstlisting}
+
+\subsection{reservas\_db}
+
+\begin{lstlisting}[style=code]
+reservas(id, usuario_id, cancha_id, cancha_nombre, deporte, inicio, fin, estado,
+         cancelada_por, motivo_cancelacion, creado_en, actualizado_en)
+\end{lstlisting}
+
+\subsection{reportes\_db}
+
+\begin{lstlisting}[style=code]
+reporte_consultas(id, usuario_id, fecha_desde, fecha_hasta, total_reservas, generado_en)
+\end{lstlisting}
+
+\section{Infraestructura y despliegue local}
+
+El despliegue local se realiza con \texttt{infra/docker-compose.yml}. El archivo levanta cuatro contenedores PostgreSQL, cuatro microservicios, los tres microfrontends remotos y el shell.
+
+\begin{lstlisting}[style=code]
+cp infra/.env.example infra/.env
+docker compose -f infra/docker-compose.yml up --build
+\end{lstlisting}
+
+La aplicacion se utiliza desde \url{http://localhost:4300}. Los puertos 4201, 4202 y 4203 corresponden a los remotes y se usan principalmente para inspeccion aislada.
+
+\evidenceimage{11-docker-compose.png}{Evidencia de despliegue local con Docker Compose.}{fig:compose}
+
+\section{Seguridad e integracion}
+
+La autenticacion de usuarios se realiza con JWT emitido por \texttt{ms-usuarios}. El shell almacena la sesion localmente y usa guards para controlar la navegacion por rol. La autorizacion efectiva se valida en backend mediante configuracion de seguridad Spring.
+
+La comunicacion interna entre microservicios usa endpoints bajo \texttt{/internal/**} protegidos con la cabecera \texttt{X-Service-Key}. Esta llave separa el trafico interno del trafico de usuarios finales.
+
+Las credenciales incluidas en archivos de ejemplo son solo para demostracion local. En ambientes reales deben reemplazarse por variables de entorno no versionadas.
+
+\section{Pruebas y validacion}
+
+El cierre tecnico se verifico el 28 de agosto de 2026. El reactor Maven completo y los cuatro proyectos Angular compilaron correctamente; ademas, las diez pruebas unitarias versionadas finalizaron sin fallos. La configuracion de Docker Compose fue validada y las evidencias funcionales se consolidaron mediante Swagger/OpenAPI, la coleccion Postman y las capturas del sistema integrado.
+
+\begin{longtable}{p{4cm}p{6cm}p{4cm}}
+\textbf{Tipo} & \textbf{Evidencia} & \textbf{Estado} \\
+\hline
+Compilacion backend & \texttt{mvn clean verify} sobre los cuatro microservicios & Exitosa. \\
+Unitarias backend & Seis pruebas JUnit en \texttt{backend/ms-*/src/test} & 6 de 6 exitosas. \\
+Compilacion frontend & \texttt{pnpm -r run build} sobre shell y remotes & Exitosa. \\
+Unitarias frontend & Cuatro specs Angular ejecutados en Chrome Headless & 4 de 4 exitosas. \\
+Infraestructura & \texttt{docker compose config} sobre la composicion integrada & Configuracion valida. \\
+API y flujo funcional & Swagger/OpenAPI, coleccion Postman y capturas del sistema & Validado y documentado. \\
+\end{longtable}
+
+\evidenceimage{09-swagger-usuarios.png}{Swagger UI de ms-usuarios.}{fig:swagger-usuarios}
+\evidenceimage{10-swagger-reservas.png}{Swagger UI de ms-reservas.}{fig:swagger-reservas}
+\evidenceimage{12-postman-collection.png}{Coleccion Postman del backend.}{fig:postman}
+
+\section{Entregables}
+
+\begin{longtable}{p{1.5cm}p{9cm}p{3cm}}
+\textbf{Codigo} & \textbf{Descripcion} & \textbf{Estado} \\
+\hline
+E1 & Documento de arquitectura con microfrontends, microservicios y modelo de datos. & Completado. \\
+E2 & Shell y microfrontends funcionando integrados por Module Federation. & Completado. \\
+E3 & Microservicios Spring Boot documentados con Swagger/OpenAPI y coleccion de pruebas. & Completado. \\
+E4 & Scripts DDL y seed de PostgreSQL. & Completado. \\
+E5 & Manual breve de despliegue local. & Completado. \\
+E6 & Presentacion final y demostracion en vivo. & Completado. \\
+\end{longtable}
+
+\section{Rubrica de evaluacion}
+
+La siguiente tabla resume los criterios del alcance y el peso usado para evaluar el proyecto integrador:
+
+\begin{longtable}{p{4.2cm}p{7.5cm}p{2cm}}
+\textbf{Criterio} & \textbf{Descripcion} & \textbf{Peso} \\
+\hline
+Alcance funcional implementado & Disponibilidad, creacion y cancelacion de reservas operativas para usuario final y administrador. & 25\% \\
+Arquitectura de microfrontends & Implementacion de Module Federation con shell host y remotes integrados, desplegables de forma independiente. & 15\% \\
+Arquitectura de microservicios & Microservicios Spring Boot independientes, con responsabilidades delimitadas y API REST documentada. & 15\% \\
+Modelo de datos y persistencia & Modelo PostgreSQL con independencia de datos entre microservicios. & 15\% \\
+Reglas de negocio y validaciones & Aplicacion de RN-01 a RN-08, especialmente la validacion de solapamiento. & 10\% \\
+Modulo de reportes basicos & Reportes de ocupacion, reservas por periodo y cancelaciones con datos consistentes. & 10\% \\
+Calidad tecnica y documentacion & Buenas practicas, manual de despliegue y claridad en arquitectura y funcionamiento. & 10\% \\
+\textbf{Total} & & \textbf{100\%} \\
+\end{longtable}
+
+\subsection{Niveles de logro}
+
+\begin{longtable}{p{3cm}p{2.5cm}p{8.5cm}}
+\textbf{Nivel} & \textbf{Puntaje} & \textbf{Descripcion general} \\
+\hline
+Excelente & 90--100 & Cumple la totalidad de los criterios con alta calidad tecnica, reglas de negocio correctas y documentacion completa. \\
+Bueno & 75--89 & Cumple la mayoria de los criterios, con observaciones menores en arquitectura, reglas o documentacion. \\
+Suficiente & 60--74 & Cumple el alcance funcional minimo, pero presenta debilidades relevantes en arquitectura, datos o reglas de negocio. \\
+Insuficiente & Menor a 60 & No cumple el alcance funcional minimo o no aplica microfrontends con Module Federation y/o microservicios Spring Boot. \\
+\end{longtable}
+
+\section{Criterios de aceptacion del alcance}
+
+El informe evidencia el cumplimiento del alcance cuando se satisfacen los siguientes criterios:
+
+\begin{enumerate}
+  \item El usuario final puede consultar disponibilidad, crear y cancelar una reserva de canchas de padel, tenis o basquet.
+  \item El administrador puede gestionar el catalogo de canchas y cancelar cualquier reserva del sistema.
+  \item El sistema impide crear reservas sobre bloques horarios ya ocupados.
+  \item El modulo de reportes basicos muestra al menos ocupacion por cancha y numero de reservas por periodo.
+  \item El frontend esta compuesto por un shell y microfrontends remotos integrados mediante Module Federation.
+  \item El backend esta compuesto por microservicios Spring Boot independientes con persistencia PostgreSQL.
+  \item Los cuatro microservicios y los cuatro proyectos Angular compilan sin errores.
+  \item Las pruebas unitarias de backend y frontend terminan sin fallos.
+\end{enumerate}
+
+\section{Estado final del proyecto}
+
+El sistema se encuentra terminado dentro del alcance aprobado. Los componentes funcionales, la arquitectura distribuida, la persistencia, la seguridad, la infraestructura local y los entregables documentales estan implementados e integrados. El cierre queda respaldado por los siguientes resultados:
+
+\begin{itemize}
+  \item Ocho aplicaciones compiladas correctamente: cuatro microservicios y cuatro microfrontends.
+  \item Diez pruebas unitarias ejecutadas sin fallos: seis de backend y cuatro de frontend.
+  \item Configuracion integrada de Docker Compose validada.
+  \item Flujos de usuario y administrador documentados con capturas, Swagger y Postman.
+  \item Informe final y manual de despliegue disponibles en fuentes LaTeX y formato PDF.
+\end{itemize}
+
+\section{Conclusiones}
+
+El proyecto cumple el objetivo principal de implementar una aplicacion empresarial distribuida con separacion clara entre frontend, backend y datos. La division en microfrontends permite aislar flujos de cliente, administracion y reportes, mientras que los microservicios separan los dominios de usuarios, canchas, reservas y reportes.
+
+La independencia de datos se respeto mediante una base PostgreSQL por servicio. La regla critica de no solapamiento de reservas fue reforzada en base de datos con un constraint especializado, lo cual mejora la consistencia del sistema bajo concurrencia. La decision de no utilizar API Gateway mantiene la arquitectura simple y suficiente para el alcance academico definido.
+
+Las verificaciones finales confirman que el codigo fuente, las pruebas, la infraestructura y la documentacion forman una entrega coherente y reproducible. Con los criterios de aceptacion satisfechos y los entregables E1 a E6 completados, el proyecto queda formalmente cerrado.
+
+\section{Anexos}
+
+\subsection{Equipo}
+
+\begin{longtable}{p{3cm}p{5cm}p{5cm}}
+\textbf{Rol} & \textbf{Responsabilidad primaria} & \textbf{Integrante} \\
+\hline
+Frontend 1 & Shell y autenticacion en interfaz; apoyo a mf-clientes. & Enzo Aliatis \\
+Frontend 2 & mf-administracion y mf-reportes. & Jordan Murillo \\
+Backend 1 & ms-usuarios y ms-canchas. & Galo Suarez \\
+Backend 2 & ms-reservas y ms-reportes. & Mauro Cadme \\
+\end{longtable}
+
+\subsection{URLs locales}
+
+\begin{longtable}{p{5cm}p{8cm}}
+\textbf{Componente} & \textbf{URL} \\
+\hline
+Shell & \url{http://localhost:4300} \\
+mf-clientes & \url{http://localhost:4201} \\
+mf-administracion & \url{http://localhost:4202} \\
+mf-reportes & \url{http://localhost:4203} \\
+Swagger ms-usuarios & \url{http://localhost:8081/swagger-ui.html} \\
+Swagger ms-canchas & \url{http://localhost:8082/swagger-ui.html} \\
+Swagger ms-reservas & \url{http://localhost:8083/swagger-ui.html} \\
+Swagger ms-reportes & \url{http://localhost:8084/swagger-ui.html} \\
+\end{longtable}
+
+\subsection{Repositorio}
+
+El codigo fuente se mantiene en un monorepo publico con carpetas principales \texttt{frontend/}, \texttt{backend/}, \texttt{database/}, \texttt{infra/} y \texttt{docs/}.
+
+\end{document}
+
