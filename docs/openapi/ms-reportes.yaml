@@ -1,0 +1,161 @@
+openapi: 3.0.3
+info:
+  title: ms-reportes API
+  description: Generación de reportes de ocupación de canchas deportivas. Requiere rol ADMINISTRADOR.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8084
+    description: Local
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Reportes
+    description: Reportes de ocupación (solo ADMINISTRADOR)
+
+paths:
+  /api/v1/reportes/ocupacion:
+    get:
+      tags: [Reportes]
+      summary: Generar reporte de ocupación por rango de fechas
+      description: |
+        Devuelve el resumen de reservas (totales, confirmadas, canceladas, finalizadas),
+        la ocupación porcentual por cancha y las reservas agrupadas por deporte,
+        para el rango de fechas indicado.
+      parameters:
+        - name: desde
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2026-09-01"
+        - name: hasta
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2026-09-30"
+      responses:
+        '200':
+          description: Reporte generado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReporteResponse'
+              example:
+                desde: "2026-09-01"
+                hasta: "2026-09-30"
+                totalReservas: 120
+                confirmadas: 85
+                canceladas: 20
+                finalizadas: 15
+                ocupacionPorCancha:
+                  - cancha: "Cancha de Pádel 1"
+                    reservasOcupadas: 45
+                    bloquesDisponibles: 200
+                    porcentajeOcupacion: 22.5
+                reservasPorDeporte:
+                  PADEL: 80
+                  TENIS: 30
+                  BASQUET: 10
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    OcupacionCancha:
+      type: object
+      properties:
+        cancha:
+          type: string
+        reservasOcupadas:
+          type: integer
+          format: int64
+        bloquesDisponibles:
+          type: integer
+          format: int64
+        porcentajeOcupacion:
+          type: number
+          format: double
+
+    ReporteResponse:
+      type: object
+      properties:
+        desde:
+          type: string
+          format: date
+        hasta:
+          type: string
+          format: date
+        totalReservas:
+          type: integer
+          format: int64
+        confirmadas:
+          type: integer
+          format: int64
+        canceladas:
+          type: integer
+          format: int64
+        finalizadas:
+          type: integer
+          format: int64
+        ocupacionPorCancha:
+          type: array
+          items:
+            $ref: '#/components/schemas/OcupacionCancha'
+        reservasPorDeporte:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+          example:
+            PADEL: 80
+            TENIS: 30
+            BASQUET: 10
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Parámetros inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Token ausente o inválido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Sin permisos suficientes
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
