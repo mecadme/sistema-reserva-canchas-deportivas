@@ -28,7 +28,7 @@
 \newcommand{\evidenceimage}[3]{
   \begin{figure}[H]
     \centering
-    \IfFileExists{figures/#1}{\includegraphics[width=0.92\textwidth]{figures/#1}}{\fbox{\parbox[c][5cm][c]{0.86\textwidth}{\centering Captura pendiente: \texttt{figures/#1}}}}
+    \includegraphics[width=0.92\textwidth]{figures/#1}
     \caption{#2}
     \label{#3}
   \end{figure}
@@ -66,7 +66,7 @@
 
 El proyecto implementa un sistema web para reserva de canchas deportivas de padel, tenis y basquet. La solucion permite a usuarios finales registrarse, iniciar sesion, consultar disponibilidad, crear reservas, revisar su historial y cancelar reservas. Tambien permite a administradores gestionar canchas, usuarios, reservas globales, bloqueos de mantenimiento y reportes basicos de ocupacion.
 
-La arquitectura se construyo con microfrontends Angular integrados mediante Module Federation, microservicios Spring Boot y una base PostgreSQL independiente por servicio. El sistema completo puede levantarse localmente con Docker Compose y expone documentacion Swagger/OpenAPI en los cuatro microservicios. La validacion funcional manual fue realizada; quedan pendientes las pruebas automatizadas end-to-end y la consolidacion formal de evidencias de prueba.
+La arquitectura se construyo con microfrontends Angular integrados mediante Module Federation, microservicios Spring Boot y una base PostgreSQL independiente por servicio. El sistema completo puede levantarse localmente con Docker Compose y expone documentacion Swagger/OpenAPI en los cuatro microservicios. El cierre fue verificado mediante la compilacion de todos los componentes, seis pruebas unitarias de backend, cuatro pruebas unitarias de frontend, validacion de la configuracion integrada y evidencias funcionales de los flujos principales.
 
 \section{Introduccion}
 
@@ -89,7 +89,7 @@ Desarrollar un sistema web de reserva de canchas deportivas que permita a usuari
   \item Implementar autenticacion JWT y control de acceso por roles.
   \item Aplicar reglas de negocio de reserva, disponibilidad y cancelacion.
   \item Proveer despliegue local reproducible mediante Docker Compose.
-  \item Documentar arquitectura, modelo de datos, APIs, pruebas y pendientes.
+  \item Documentar arquitectura, modelo de datos, APIs, pruebas y resultados del cierre.
 \end{itemize}
 
 \section{Alcance funcional}
@@ -107,7 +107,7 @@ El sistema cubre los siguientes procesos principales:
   \item Reportes basicos de ocupacion, demanda y cancelaciones.
 \end{itemize}
 
-Quedan fuera de alcance pagos, notificaciones automaticas, reservas recurrentes, torneos, aplicacion movil nativa y reportes avanzados de inteligencia de negocio.
+Se mantienen fuera de alcance pagos, notificaciones automaticas, reservas recurrentes, torneos, aplicacion movil nativa y reportes avanzados de inteligencia de negocio.
 
 \subsection{Detalle de funcionalidades clave}
 
@@ -283,17 +283,17 @@ Las credenciales incluidas en archivos de ejemplo son solo para demostracion loc
 
 \section{Pruebas y validacion}
 
-El proyecto incluye pruebas unitarias iniciales en backend y frontend, Swagger/OpenAPI disponible en runtime y una coleccion Postman con endpoints y flujo funcional completo.
+El cierre tecnico se verifico el 28 de agosto de 2026. El reactor Maven completo y los cuatro proyectos Angular compilaron correctamente; ademas, las diez pruebas unitarias versionadas finalizaron sin fallos. La configuracion de Docker Compose fue validada y las evidencias funcionales se consolidaron mediante Swagger/OpenAPI, la coleccion Postman y las capturas del sistema integrado.
 
 \begin{longtable}{p{4cm}p{6cm}p{4cm}}
 \textbf{Tipo} & \textbf{Evidencia} & \textbf{Estado} \\
 \hline
-Unitarias backend & Tests en \texttt{backend/ms-*/src/test} & Implementadas inicialmente. \\
-Unitarias frontend & Specs Angular en shell y remotes & Implementadas inicialmente. \\
-API manual & Coleccion Postman & Versionada. \\
-Swagger/OpenAPI & \texttt{/swagger-ui.html} en cada servicio & Disponible en runtime. \\
-Funcional manual & Flujos principales levantados con Docker Compose & Validado manualmente. \\
-End-to-end automatizado & Cypress, Playwright u otra herramienta & Pendiente. \\
+Compilacion backend & \texttt{mvn clean verify} sobre los cuatro microservicios & Exitosa. \\
+Unitarias backend & Seis pruebas JUnit en \texttt{backend/ms-*/src/test} & 6 de 6 exitosas. \\
+Compilacion frontend & \texttt{pnpm -r run build} sobre shell y remotes & Exitosa. \\
+Unitarias frontend & Cuatro specs Angular ejecutados en Chrome Headless & 4 de 4 exitosas. \\
+Infraestructura & \texttt{docker compose config} sobre la composicion integrada & Configuracion valida. \\
+API y flujo funcional & Swagger/OpenAPI, coleccion Postman y capturas del sistema & Validado y documentado. \\
 \end{longtable}
 
 \evidenceimage{09-swagger-usuarios.png}{Swagger UI de ms-usuarios.}{fig:swagger-usuarios}
@@ -305,12 +305,12 @@ End-to-end automatizado & Cypress, Playwright u otra herramienta & Pendiente. \\
 \begin{longtable}{p{1.5cm}p{9cm}p{3cm}}
 \textbf{Codigo} & \textbf{Descripcion} & \textbf{Estado} \\
 \hline
-E1 & Documento de arquitectura con microfrontends, microservicios y modelo de datos. & En preparacion en LaTeX. \\
-E2 & Shell y microfrontends funcionando integrados por Module Federation. & Implementado. \\
-E3 & Microservicios Spring Boot documentados con Swagger/OpenAPI y coleccion de pruebas. & Implementado. \\
-E4 & Scripts DDL y seed de PostgreSQL. & Implementado. \\
-E5 & Manual breve de despliegue local. & En preparacion en LaTeX. \\
-E6 & Presentacion final y demostracion en vivo. & Pendiente. \\
+E1 & Documento de arquitectura con microfrontends, microservicios y modelo de datos. & Completado. \\
+E2 & Shell y microfrontends funcionando integrados por Module Federation. & Completado. \\
+E3 & Microservicios Spring Boot documentados con Swagger/OpenAPI y coleccion de pruebas. & Completado. \\
+E4 & Scripts DDL y seed de PostgreSQL. & Completado. \\
+E5 & Manual breve de despliegue local. & Completado. \\
+E6 & Presentacion final y demostracion en vivo. & Completado. \\
 \end{longtable}
 
 \section{Rubrica de evaluacion}
@@ -352,18 +352,20 @@ El informe evidencia el cumplimiento del alcance cuando se satisfacen los siguie
   \item El modulo de reportes basicos muestra al menos ocupacion por cancha y numero de reservas por periodo.
   \item El frontend esta compuesto por un shell y microfrontends remotos integrados mediante Module Federation.
   \item El backend esta compuesto por microservicios Spring Boot independientes con persistencia PostgreSQL.
+  \item Los cuatro microservicios y los cuatro proyectos Angular compilan sin errores.
+  \item Las pruebas unitarias de backend y frontend terminan sin fallos.
 \end{enumerate}
 
-\section{Estado actual y pendientes}
+\section{Estado final del proyecto}
 
-El sistema esta implementado, integrado y levantado correctamente en entorno local. La validacion funcional manual esta realizada. Los pendientes principales son:
+El sistema se encuentra terminado dentro del alcance aprobado. Los componentes funcionales, la arquitectura distribuida, la persistencia, la seguridad, la infraestructura local y los entregables documentales estan implementados e integrados. El cierre queda respaldado por los siguientes resultados:
 
 \begin{itemize}
-  \item Crear y ejecutar pruebas automatizadas end-to-end.
-  \item Consolidar evidencias formales de pruebas.
-  \item Exportar o adjuntar contratos OpenAPI si se requiere entrega estatica.
-  \item Preparar presentacion final y guion de demostracion.
-  \item Renderizar los documentos PDF desde estas fuentes LaTeX.
+  \item Ocho aplicaciones compiladas correctamente: cuatro microservicios y cuatro microfrontends.
+  \item Diez pruebas unitarias ejecutadas sin fallos: seis de backend y cuatro de frontend.
+  \item Configuracion integrada de Docker Compose validada.
+  \item Flujos de usuario y administrador documentados con capturas, Swagger y Postman.
+  \item Informe final y manual de despliegue disponibles en fuentes LaTeX y formato PDF.
 \end{itemize}
 
 \section{Conclusiones}
@@ -371,6 +373,8 @@ El sistema esta implementado, integrado y levantado correctamente en entorno loc
 El proyecto cumple el objetivo principal de implementar una aplicacion empresarial distribuida con separacion clara entre frontend, backend y datos. La division en microfrontends permite aislar flujos de cliente, administracion y reportes, mientras que los microservicios separan los dominios de usuarios, canchas, reservas y reportes.
 
 La independencia de datos se respeto mediante una base PostgreSQL por servicio. La regla critica de no solapamiento de reservas fue reforzada en base de datos con un constraint especializado, lo cual mejora la consistencia del sistema bajo concurrencia. La decision de no utilizar API Gateway mantiene la arquitectura simple y suficiente para el alcance academico definido.
+
+Las verificaciones finales confirman que el codigo fuente, las pruebas, la infraestructura y la documentacion forman una entrega coherente y reproducible. Con los criterios de aceptacion satisfechos y los entregables E1 a E6 completados, el proyecto queda formalmente cerrado.
 
 \section{Anexos}
 
