@@ -1,0 +1,363 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "API de Canchas",
+        "version": "v1"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8082",
+            "description": "Generated server url"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
+    "paths": {
+        "/api/v1/canchas/{id}": {
+            "put": {
+                "tags": [
+                    "cancha-controller"
+                ],
+                "operationId": "actualizar",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CanchaRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CanchaResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/canchas": {
+            "get": {
+                "tags": [
+                    "cancha-controller"
+                ],
+                "operationId": "listar",
+                "parameters": [
+                    {
+                        "name": "soloActivas",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CanchaResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "cancha-controller"
+                ],
+                "operationId": "crear",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CanchaRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CanchaResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/canchas/{id}/mantenimientos": {
+            "get": {
+                "tags": [
+                    "cancha-controller"
+                ],
+                "operationId": "mantenimientos",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/MantenimientoResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "cancha-controller"
+                ],
+                "operationId": "bloquear",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MantenimientoRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MantenimientoResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/canchas/{id}/estado": {
+            "patch": {
+                "tags": [
+                    "cancha-controller"
+                ],
+                "operationId": "cambiarEstado",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EstadoRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CanchaResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "CanchaRequest": {
+                "type": "object",
+                "properties": {
+                    "nombre": {
+                        "type": "string",
+                        "maxLength": 120,
+                        "minLength": 0
+                    },
+                    "deporte": {
+                        "type": "string",
+                        "enum": [
+                            "PADEL",
+                            "TENIS",
+                            "BASQUET"
+                        ]
+                    },
+                    "horaApertura": {
+                        "type": "string"
+                    },
+                    "horaCierre": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "deporte",
+                    "horaApertura",
+                    "horaCierre",
+                    "nombre"
+                ]
+            },
+            "CanchaResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "nombre": {
+                        "type": "string"
+                    },
+                    "deporte": {
+                        "type": "string",
+                        "enum": [
+                            "PADEL",
+                            "TENIS",
+                            "BASQUET"
+                        ]
+                    },
+                    "horaApertura": {
+                        "type": "string"
+                    },
+                    "horaCierre": {
+                        "type": "string"
+                    },
+                    "activa": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "MantenimientoRequest": {
+                "type": "object",
+                "properties": {
+                    "inicio": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "fin": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "motivo": {
+                        "type": "string",
+                        "maxLength": 250,
+                        "minLength": 0
+                    }
+                },
+                "required": [
+                    "fin",
+                    "inicio",
+                    "motivo"
+                ]
+            },
+            "MantenimientoResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "canchaId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "inicio": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "fin": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "motivo": {
+                        "type": "string"
+                    }
+                }
+            },
+            "EstadoRequest": {
+                "type": "object",
+                "properties": {
+                    "activa": {
+                        "type": "boolean"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "name": "bearerAuth",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}
