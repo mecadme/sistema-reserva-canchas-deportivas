@@ -1,0 +1,294 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "API de Reservas",
+        "version": "v1"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8083",
+            "description": "Generated server url"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
+    "paths": {
+        "/api/v1/reservas": {
+            "get": {
+                "tags": [
+                    "reserva-controller"
+                ],
+                "operationId": "todas",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ReservaResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "reserva-controller"
+                ],
+                "operationId": "crear",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CrearReservaRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReservaResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/reservas/{id}/cancelacion": {
+            "patch": {
+                "tags": [
+                    "reserva-controller"
+                ],
+                "operationId": "cancelar",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CancelarReservaRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReservaResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/reservas/mias": {
+            "get": {
+                "tags": [
+                    "reserva-controller"
+                ],
+                "operationId": "mias",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ReservaResponse"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/disponibilidad": {
+            "get": {
+                "tags": [
+                    "reserva-controller"
+                ],
+                "operationId": "disponibilidad",
+                "parameters": [
+                    {
+                        "name": "canchaId",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "fecha",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DisponibilidadResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "CrearReservaRequest": {
+                "type": "object",
+                "properties": {
+                    "canchaId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "inicio": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "canchaId",
+                    "inicio"
+                ]
+            },
+            "ReservaResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "usuarioId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "canchaId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "canchaNombre": {
+                        "type": "string"
+                    },
+                    "deporte": {
+                        "type": "string"
+                    },
+                    "inicio": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "fin": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "estado": {
+                        "type": "string",
+                        "enum": [
+                            "CONFIRMADA",
+                            "CANCELADA",
+                            "FINALIZADA"
+                        ]
+                    },
+                    "canceladaPor": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "motivoCancelacion": {
+                        "type": "string"
+                    }
+                }
+            },
+            "CancelarReservaRequest": {
+                "type": "object",
+                "properties": {
+                    "motivo": {
+                        "type": "string",
+                        "maxLength": 250,
+                        "minLength": 0
+                    }
+                }
+            },
+            "DisponibilidadResponse": {
+                "type": "object",
+                "properties": {
+                    "canchaId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "fecha": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "bloques": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SlotResponse"
+                        }
+                    }
+                }
+            },
+            "SlotResponse": {
+                "type": "object",
+                "properties": {
+                    "inicio": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "fin": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "estado": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "name": "bearerAuth",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}
