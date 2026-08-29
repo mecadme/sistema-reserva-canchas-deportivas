@@ -1,0 +1,287 @@
+openapi: 3.0.3
+info:
+  title: ms-reservas API
+  description: Disponibilidad de canchas, creación y cancelación de reservas deportivas.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8083
+    description: Local
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Disponibilidad
+    description: Consulta de slots disponibles por cancha y fecha
+  - name: Reservas
+    description: Creación, listado y cancelación de reservas
+
+paths:
+  /api/v1/disponibilidad:
+    get:
+      tags: [Disponibilidad]
+      summary: Obtener disponibilidad de una cancha para una fecha
+      security: []
+      parameters:
+        - name: canchaId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: fecha
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2026-09-10"
+      responses:
+        '200':
+          description: Slots de disponibilidad calculados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisponibilidadResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/reservas:
+    post:
+      tags: [Reservas]
+      summary: Crear una reserva (usuario autenticado)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CrearReservaRequest'
+            example:
+              canchaId: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+              inicio: "2026-09-10T10:00:00-05:00"
+      responses:
+        '201':
+          description: Reserva creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservaResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+    get:
+      tags: [Reservas]
+      summary: Listar todas las reservas (ADMINISTRADOR)
+      responses:
+        '200':
+          description: Lista completa de reservas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReservaResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/reservas/mias:
+    get:
+      tags: [Reservas]
+      summary: Listar reservas del usuario autenticado
+      responses:
+        '200':
+          description: Reservas propias
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReservaResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/reservas/{id}/cancelacion:
+    patch:
+      tags: [Reservas]
+      summary: Cancelar una reserva
+      description: |
+        Un usuario puede cancelar sus propias reservas.
+        Un ADMINISTRADOR puede cancelar cualquier reserva.
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelarReservaRequest'
+            example:
+              motivo: "Cambio de planes"
+      responses:
+        '200':
+          description: Reserva cancelada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservaResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    EstadoReserva:
+      type: string
+      enum: [CONFIRMADA, CANCELADA, FINALIZADA]
+
+    CrearReservaRequest:
+      type: object
+      required: [canchaId, inicio]
+      properties:
+        canchaId:
+          type: string
+          format: uuid
+        inicio:
+          type: string
+          format: date-time
+          description: Fecha y hora de inicio de la reserva (con offset de zona horaria)
+
+    CancelarReservaRequest:
+      type: object
+      properties:
+        motivo:
+          type: string
+          maxLength: 250
+
+    ReservaResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        usuarioId:
+          type: string
+          format: uuid
+        canchaId:
+          type: string
+          format: uuid
+        canchaNombre:
+          type: string
+        deporte:
+          type: string
+        inicio:
+          type: string
+          format: date-time
+        fin:
+          type: string
+          format: date-time
+        estado:
+          $ref: '#/components/schemas/EstadoReserva'
+        canceladaPor:
+          type: string
+          format: uuid
+          nullable: true
+        motivoCancelacion:
+          type: string
+          nullable: true
+
+    SlotResponse:
+      type: object
+      properties:
+        inicio:
+          type: string
+          format: date-time
+        fin:
+          type: string
+          format: date-time
+        estado:
+          type: string
+          description: DISPONIBLE | RESERVADO | BLOQUEADO | FUERA_HORARIO
+
+    DisponibilidadResponse:
+      type: object
+      properties:
+        canchaId:
+          type: string
+          format: uuid
+        fecha:
+          type: string
+          format: date
+        bloques:
+          type: array
+          items:
+            $ref: '#/components/schemas/SlotResponse'
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Datos de entrada inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Token ausente o inválido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Sin permisos suficientes
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflicto (slot ocupado, reserva ya cancelada, etc.)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

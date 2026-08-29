@@ -1,0 +1,134 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "API de Reportes",
+        "version": "v1"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8084",
+            "description": "Generated server url"
+        }
+    ],
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
+    "paths": {
+        "/api/v1/reportes/ocupacion": {
+            "get": {
+                "tags": [
+                    "reporte-controller"
+                ],
+                "operationId": "ocupacion",
+                "parameters": [
+                    {
+                        "name": "desde",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "hasta",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReporteResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "OcupacionCancha": {
+                "type": "object",
+                "properties": {
+                    "cancha": {
+                        "type": "string"
+                    },
+                    "reservasOcupadas": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "bloquesDisponibles": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "porcentajeOcupacion": {
+                        "type": "number",
+                        "format": "double"
+                    }
+                }
+            },
+            "ReporteResponse": {
+                "type": "object",
+                "properties": {
+                    "desde": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "hasta": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "totalReservas": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "confirmadas": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "canceladas": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "finalizadas": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "ocupacionPorCancha": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OcupacionCancha"
+                        }
+                    },
+                    "reservasPorDeporte": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "name": "bearerAuth",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}
