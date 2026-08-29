@@ -2853,7 +2853,7 @@
 								},
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"canchaId\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n  \"inicio\": \"2026-08-29T07:00:00-05:00\"\n}"
+									"raw": "{\n  \"canchaId\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n  \"inicio\": \"2026-08-30T07:00:00-05:00\"\n}"
 								}
 							},
 							"event": [
@@ -2861,7 +2861,7 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											"pm.test('Devuelve 409 (cae dentro del bloqueo de mantenimiento sembrado en database/canchas/V2__seed.sql; si se reubica el bloqueo, actualizar esta fecha)', () => pm.response.to.have.status(409));"
+											"pm.test('Devuelve 409 (cae dentro del bloqueo de mantenimiento sembrado en ms-canchas/V4__bloqueo_padel_a_manana.sql; si se reubica el bloqueo, actualizar esta fecha)', () => pm.response.to.have.status(409));"
 										]
 									}
 								}
@@ -3000,7 +3000,7 @@
 					]
 				},
 				{
-					"name": "2. ❌ Reservar Pádel A durante el mantenimiento del 29-ago (409)",
+					"name": "2. ❌ Reservar Pádel A durante el mantenimiento del 30-ago (409)",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -3026,7 +3026,7 @@
 						},
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"canchaId\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n  \"inicio\": \"2026-08-29T07:00:00-05:00\"\n}"
+							"raw": "{\n  \"canchaId\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n  \"inicio\": \"2026-08-30T07:00:00-05:00\"\n}"
 						}
 					},
 					"event": [
